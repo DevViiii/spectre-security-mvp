@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 RuleType = Literal["regex", "ner", "keyword"]
-Action = Literal["block", "redact", "alert"]
+Action = Literal["allow", "block", "redact", "alert"]
 Direction = Literal["input", "output", "both"]
 
 

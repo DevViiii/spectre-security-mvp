@@ -33,7 +33,7 @@ def ok(
         error=None,
         meta=Meta(request_id=request_id, **(meta or {})),
     )
-    return JSONResponse(content=payload.model_dump(exclude_none=True), status_code=status_code)
+    return JSONResponse(content=payload.model_dump(exclude_none=True, mode="json"), status_code=status_code)
 
 
 def created(data: Any, *, request_id: str | None = None) -> JSONResponse:

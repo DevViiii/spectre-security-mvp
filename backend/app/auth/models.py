@@ -16,7 +16,7 @@ class ApiKey(Base):
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     key_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
-    key_prefix: Mapped[str] = mapped_column(String(8), nullable=False)  # first 8 chars for display
+    key_prefix: Mapped[str] = mapped_column(String(12), nullable=False)  # first 12 chars for display
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

@@ -7,8 +7,8 @@ celery_app = Celery(
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
     include=[
-        "worker.tasks.scan_tasks",
-        "worker.tasks.report_tasks",
+        "app.worker.tasks.scan_tasks",
+        "app.worker.tasks.report_tasks",
     ],
 )
 
@@ -40,7 +40,7 @@ celery_app.conf.update(
 
     # Route by task name
     task_routes={
-        "worker.tasks.scan_tasks.*": {"queue": "scans"},
-        "worker.tasks.report_tasks.*": {"queue": "reports"},
+        "app.worker.tasks.scan_tasks.*": {"queue": "scans"},
+        "app.worker.tasks.report_tasks.*": {"queue": "reports"},
     },
 )

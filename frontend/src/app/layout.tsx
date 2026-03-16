@@ -1,19 +1,16 @@
 import type { Metadata } from "next";
-import { Syne } from "next/font/google";
-import localFont from "next/font/local";
+import { Geist, Geist_Mono, Syne } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const geistSans = localFont({
-  src: "../../public/fonts/GeistVF.woff",
+const geistSans = Geist({
+  subsets: ["latin"],
   variable: "--font-geist-sans",
-  fallback: ["system-ui", "sans-serif"],
 });
 
-const geistMono = localFont({
-  src: "../../public/fonts/GeistMonoVF.woff",
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
   variable: "--font-geist-mono",
-  fallback: ["monospace"],
 });
 
 const syne = Syne({

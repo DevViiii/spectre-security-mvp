@@ -17,11 +17,16 @@ import redis.asyncio as aioredis
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import uuid
+
 from app.config import settings
 from app.shield import service as shield_service
 from app.shield.dlp.engine import inspect, PolicyMatch
+from app.shield.dlp.detection.engine import get_engine
 from app.shield.models import Policy
 from app.shield.schemas import InspectRequest, InspectResponse, ViolationDetail
+
+_BUILTIN_POLICY_ID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 
 logger = structlog.get_logger(__name__)
 
@@ -49,7 +54,10 @@ async def run_inspection(
         policies=policies,
     )
 
-    # Persist violations (fire-and-forget for non-blocking matches; awaited for blocks)
+    # Run the built-in detection engine (injection, leak, jailbreak, secrets, heuristics)
+    detection = get_engine().run(request.text, direction=request.direction)
+
+    # Persist violations for DB policy matches
     violation_details: list[ViolationDetail] = []
     for match in result.matches:
         await shield_service.log_violation(
@@ -70,14 +78,36 @@ async def run_inspection(
             match_location=request.direction,
         ))
 
+    # Surface detection engine findings as violations
+    for finding in detection.findings:
+        action = "block" if finding.severity == "critical" else "alert"
+        violation_details.append(ViolationDetail(
+            policy_id=_BUILTIN_POLICY_ID,
+            policy_name=finding.rule_name,
+            rule_type=finding.category,
+            action=action,
+            matched_pattern=finding.matched_text,
+            match_location=finding.direction,
+        ))
+
+    # Determine overall action: detection engine can escalate
+    overall_action = result.action if result.matches else "allow"
+    allowed = result.allowed
+    if detection.findings:
+        if detection.verdict in ("CRITICAL", "HIGH"):
+            overall_action = "block"
+            allowed = False
+        elif overall_action == "allow":
+            overall_action = "alert"
+
     total_ms = (time.perf_counter() - start) * 1000
 
     if total_ms > settings.SHIELD_MAX_INSPECTION_MS * 2:
         logger.warning("inspection_slow", duration_ms=round(total_ms, 2))
 
     return InspectResponse(
-        allowed=result.allowed,
-        action=result.action if result.matches else "allow",
+        allowed=allowed,
+        action=overall_action,
         modified_text=result.modified_text,
         violations=violation_details,
         inspection_ms=round(total_ms, 2),
@@ -94,19 +124,22 @@ async def _load_policies(db: AsyncSession, redis: aioredis.Redis) -> list[Policy
     policy attributes; no lazy loading occurs.
     """
     import json
-    import pickle
 
     cache_hit = await redis.get(_POLICY_CACHE_KEY)
     if cache_hit:
         try:
-            return pickle.loads(cache_hit)
+            rows = json.loads(cache_hit)
+            return [Policy(**row) for row in rows]
         except Exception:
             pass  # fall through to DB
 
     policies = await shield_service.list_active_policies(db)
 
     try:
-        serialized = pickle.dumps(policies)
+        serialized = json.dumps([
+            {c.name: getattr(p, c.name) for c in p.__table__.columns}
+            for p in policies
+        ], default=str)
         await redis.set(_POLICY_CACHE_KEY, serialized, ex=settings.SHIELD_POLICY_CACHE_TTL)
     except Exception as exc:
         logger.warning("policy_cache_write_failed", error=str(exc))
