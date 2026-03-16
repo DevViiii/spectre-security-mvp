@@ -1,0 +1,21 @@
+-r requirements.txt
+
+# ── Testing ────────────────────────────────────────────────────────────────
+pytest==8.3.4
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
+httpx==0.28.1           # for TestClient / async test requests
+
+# ── Mocking ────────────────────────────────────────────────────────────────
+respx==0.21.1           # mock httpx calls in scanner tests
+
+# ── Database (test) ────────────────────────────────────────────────────────
+aiosqlite==0.20.0       # SQLite async driver for unit tests (no Postgres needed)
+
+# ── Linting / formatting ───────────────────────────────────────────────────
+ruff==0.8.4
+mypy==1.13.0
+
+# ── Type stubs ─────────────────────────────────────────────────────────────
+types-pyyaml==6.0.12.20241221
+boto3-stubs[s3]==1.35.86

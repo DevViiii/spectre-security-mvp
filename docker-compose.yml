@@ -1,0 +1,115 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: spectre
+      POSTGRES_PASSWORD: spectre
+      POSTGRES_DB: spectre
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spectre"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── Redis ───────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── FastAPI backend ─────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql://spectre:spectre@postgres:5432/spectre
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      SECRET_KEY: dev-secret-key-not-for-production
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      LLM_JUDGE_ENABLED: "false"   # disable by default in dev
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      S3_BUCKET_NAME: spectre-reports-dev
+    volumes:
+      - ./backend:/app   # hot reload in dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ── Celery worker ───────────────────────────────────────────────────────
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql://spectre:spectre@postgres:5432/spectre
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      LLM_JUDGE_ENABLED: "false"
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      S3_BUCKET_NAME: spectre-reports-dev
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── Celery Flower (task monitor) ────────────────────────────────────────
+  flower:
+    image: mher/flower:2.0
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/1
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+
+  # ── Next.js frontend ────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:

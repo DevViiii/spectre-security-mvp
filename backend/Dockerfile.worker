@@ -1,0 +1,35 @@
+FROM python:3.12-slim AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libfontconfig1 \
+    libgdk-pixbuf2.0-0 \
+    libcairo2 \
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m spacy download en_core_web_sm
+
+COPY . .
+
+RUN addgroup --system spectre && adduser --system --ingroup spectre spectre
+RUN chown -R spectre:spectre /app
+USER spectre
+
+# -A spectre = celery app name from celery_app.py
+# -Q scans,reports = consume both queues
+# --loglevel=info = structured output
+CMD ["celery", "-A", "app.worker.celery_app", "worker", \
+     "-Q", "scans,reports", \
+     "--loglevel=info", \
+     "--concurrency=4"]

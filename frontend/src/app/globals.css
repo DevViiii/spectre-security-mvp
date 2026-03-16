@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sidebar-width: 220px;
+}
+
+/* ── Base resets ──────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar styling ───────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2e2e3f;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3d3d54;
+}
+
+/* ── Selection ───────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(124, 58, 237, 0.3);
+  color: #e9d5ff;
+}
+
+/* ── Typography ──────────────────────────────────────────────────────── */
+.font-display {
+  font-family: var(--font-syne);
+}
+
+/* ── Utility: scanline texture overlay ───────────────────────────────── */
+.scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+}
+
+/* ── Utility: violet glow on focus ──────────────────────────────────── */
+.focus-violet:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.5);
+}
+
+/* ── Grade colors ─────────────────────────────────────────────────────── */
+.grade-A { color: #22c55e; }
+.grade-B { color: #84cc16; }
+.grade-C { color: #f59e0b; }
+.grade-D { color: #f97316; }
+.grade-F { color: #ef4444; }

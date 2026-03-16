@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { size: A4; margin: 2cm 2.5cm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 11px; color: #1a1a1a; line-height: 1.5; }
+
+    .header { border-bottom: 3px solid #0f172a; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .brand { font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; }
+    .brand span { color: #7c3aed; }
+    .report-meta { text-align: right; color: #64748b; font-size: 10px; }
+
+    h1 { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+    h2 { font-size: 14px; font-weight: 600; color: #0f172a; margin: 20px 0 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+    h3 { font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin: 16px 0; }
+    .metric-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; text-align: center; }
+    .metric-value { font-size: 28px; font-weight: 700; line-height: 1; }
+    .metric-label { font-size: 10px; color: #64748b; margin-top: 4px; }
+
+    .grade-badge { display: inline-block; width: 56px; height: 56px; border-radius: 50%; font-size: 28px; font-weight: 700; line-height: 56px; text-align: center; color: white; background: {{ grade_color }}; }
+
+    .target-block { background: #f1f5f9; border-left: 3px solid #7c3aed; padding: 10px 14px; border-radius: 0 4px 4px 0; margin: 10px 0; font-size: 10px; }
+    .target-block strong { color: #0f172a; }
+
+    table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10px; }
+    th { background: #0f172a; color: white; padding: 6px 10px; text-align: left; font-weight: 600; }
+    td { padding: 5px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    tr:nth-child(even) td { background: #f8fafc; }
+
+    .severity-critical { color: #dc2626; font-weight: 700; }
+    .severity-high     { color: #ea580c; font-weight: 600; }
+    .severity-medium   { color: #d97706; }
+    .severity-low      { color: #16a34a; }
+
+    .status-failed { background: #fef2f2; color: #dc2626; font-weight: 700; padding: 1px 6px; border-radius: 3px; }
+    .status-passed { background: #f0fdf4; color: #16a34a; padding: 1px 6px; border-radius: 3px; }
+    .status-error  { background: #f8fafc; color: #64748b; padding: 1px 6px; border-radius: 3px; }
+
+    .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e2e8f0; text-align: center; color: #94a3b8; font-size: 9px; }
+    .page-break { page-break-before: always; }
+    .payload { font-family: monospace; font-size: 9px; background: #f1f5f9; padding: 4px 6px; border-radius: 3px; color: #374151; max-width: 280px; word-break: break-all; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="brand">Spectre<span>Security</span></div>
+    <div style="font-size:10px;color:#64748b;margin-top:2px;">Adversarial Testing Report</div>
+  </div>
+  <div class="report-meta">
+    Scan ID: {{ scan_id[:8] }}...<br>
+    Generated: {{ created_at }}<br>
+    Completed: {{ completed_at }}
+  </div>
+</div>
+
+<h1>{{ scan_name }}</h1>
+<p style="color:#64748b;font-size:11px;margin-bottom:16px;">Suite: <strong>{{ attack_suite }}</strong></p>
+
+<div class="target-block">
+  <strong>Target endpoint:</strong> {{ target_url }}
+</div>
+
+<h2>Executive Summary</h2>
+<div class="summary-grid">
+  <div class="metric-card">
+    <div class="metric-value">
+      <div class="grade-badge">{{ grade }}</div>
+    </div>
+    <div class="metric-label">Security Grade</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-value" style="color:{{ grade_color }}">{{ score }}</div>
+    <div class="metric-label">Score (0–100)</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-value" style="color:#dc2626">{{ failed_attacks }}</div>
+    <div class="metric-label">Vulnerabilities Found</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-value" style="color:#0f172a">{{ total_attacks }}</div>
+    <div class="metric-label">Attacks Tested</div>
+  </div>
+</div>
+
+{% if breakdown %}
+<h2>Findings by Severity</h2>
+<table>
+  <tr><th>Severity</th><th>Total</th><th>Failed</th><th>Passed</th></tr>
+  {% for sev in ['critical','high','medium','low'] %}
+    {% if breakdown.get(sev) %}
+    <tr>
+      <td class="severity-{{ sev }}">{{ sev|upper }}</td>
+      <td>{{ breakdown[sev].total }}</td>
+      <td style="color:#dc2626;font-weight:600">{{ breakdown[sev].failed }}</td>
+      <td style="color:#16a34a">{{ breakdown[sev].passed }}</td>
+    </tr>
+    {% endif %}
+  {% endfor %}
+</table>
+{% endif %}
+
+<div class="page-break"></div>
+<h2>Detailed Findings</h2>
+<table>
+  <tr>
+    <th style="width:8%">ID</th>
+    <th style="width:14%">Category</th>
+    <th style="width:9%">Severity</th>
+    <th style="width:8%">Status</th>
+    <th style="width:22%">Payload (excerpt)</th>
+    <th style="width:39%">Response / Classifier</th>
+  </tr>
+  {% for f in findings %}
+  <tr>
+    <td style="font-family:monospace;font-size:9px">{{ f.attack_id }}</td>
+    <td>{{ f.category.replace('_',' ') }}</td>
+    <td class="severity-{{ f.severity }}">{{ f.severity }}</td>
+    <td><span class="status-{{ f.status }}">{{ f.status }}</span></td>
+    <td><div class="payload">{{ (f.payload or '')[:120] }}{% if f.payload and f.payload|length > 120 %}…{% endif %}</div></td>
+    <td style="font-size:9px;color:#374151">
+      {% if f.response_excerpt %}{{ f.response_excerpt[:200] }}{% endif %}
+      {% if f.classifier_used %}<br><em style="color:#94a3b8">via {{ f.classifier_used }}</em>{% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+<div class="footer">
+  Spectre Security · Confidential · This report is for the exclusive use of the named recipient.
+  Scan ID {{ scan_id }} · {{ created_at }}
+</div>
+</body>
+</html>
