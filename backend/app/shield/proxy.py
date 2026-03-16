@@ -1,7 +1,13 @@
 """
 Shield proxy — the hot path.
 POST /shield/inspect is called by the Python SDK on every LLM I/O.
-Must return in <30ms p95.
+
+v1 pipeline:
+  1. Load active DB policies (Redis-cached)
+  2. Run DetectionEngine (regex + heuristic rules)
+  3. Run DB policy matchers (customer-defined)
+  4. Merge, determine action, persist violations
+  5. Return InspectResponse
 """
 from __future__ import annotations
 
