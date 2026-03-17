@@ -54,12 +54,15 @@ def detect_keywords(
 
         # Fuzzy word-level match (optional, for typo tolerance)
         if use_fuzzy:
-            for word in words:
-                ratio = difflib.SequenceMatcher(None, term_lower, word).ratio()
+            term_words = term_lower.split()
+            n = len(term_words)
+            for i in range(len(words) - n + 1):
+                ngram = " ".join(words[i:i + n])
+                ratio = difflib.SequenceMatcher(None, term_lower, ngram).ratio()
                 if ratio >= fuzzy_threshold:
                     matches.append(BlocklistMatch(
                         term=term,
-                        matched_text=word,
+                        matched_text=ngram,
                         fuzzy=True,
                         score=ratio,
                     ))
