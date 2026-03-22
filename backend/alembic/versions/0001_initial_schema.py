@@ -38,7 +38,7 @@ def upgrade() -> None:
         sa.Column("target_url", sa.String(2048), nullable=False),
         sa.Column("target_api_key_hint", sa.String(20), nullable=True),
         sa.Column("attack_suite", sa.String(50), nullable=False, server_default="full"),
-        sa.Column("status", sa.String(20), nullable=False, server_default="pending", index=True),
+        sa.Column("status", sa.String(20), nullable=False, server_default="pending"),
         sa.Column("error_message", sa.Text(), nullable=True),
         sa.Column("score", sa.Integer(), nullable=True),
         sa.Column("grade", sa.String(2), nullable=True),

@@ -15,6 +15,12 @@ from app.shield.router import router as shield_router
 from app.reports.router import router as reports_router
 from app.audit.router import router as audit_router
 from app.health import router as health_router
+from app.organizations.router import router as organizations_router
+
+import app.organizations.model          # noqa: F401
+import app.organizations.user_model     # noqa: F401
+import app.organizations.client_model   # noqa: F401
+import app.reports.model                # noqa: F401
 
 
 @asynccontextmanager
@@ -58,6 +64,7 @@ def create_app() -> FastAPI:
     app.include_router(shield_router,  prefix="/shield",       tags=["shield"])
     app.include_router(reports_router, prefix="/reports",      tags=["reports"])
     app.include_router(audit_router,   prefix="/audit",        tags=["audit"])
+    app.include_router(organizations_router, prefix="/organizations", tags=["organizations"])
 
     return app
 

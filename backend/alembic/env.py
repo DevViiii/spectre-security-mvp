@@ -12,6 +12,10 @@ import app.auth.models          # noqa: F401
 import app.scanner.models       # noqa: F401
 import app.shield.models        # noqa: F401
 import app.audit.models         # noqa: F401
+import app.organizations.model        # noqa: F401
+import app.organizations.user_model   # noqa: F401
+import app.organizations.client_model # noqa: F401
+import app.reports.model              # noqa: F401
 
 from app.config import settings
 
