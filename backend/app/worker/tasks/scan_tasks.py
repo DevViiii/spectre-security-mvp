@@ -48,12 +48,15 @@ def run_scan(self, scan_id: str) -> dict:
 
 
 async def _run_scan_async(scan_id: str) -> dict:
-    from app.core.database import AsyncSessionLocal
+    from app.core.database import engine, AsyncSessionLocal
     from app.scanner import service as scan_service
     from app.scanner.attacks.loader import load_attacks
     from app.scanner.classifiers import classify_response
     from app.scanner.models import ScanFinding
     from app.scanner.scorer import compute_score, FindingInput
+
+    # Dispose stale connections from forked worker process
+    await engine.dispose()
 
     scan_uuid = uuid.UUID(scan_id)
     log = logger.bind(scan_id=scan_id)

@@ -22,11 +22,7 @@ logger = structlog.get_logger(__name__)
 )
 def generate_report(self, scan_id: str) -> dict:
     try:
-        loop = asyncio.new_event_loop()
-        try:
-            return loop.run_until_complete(_generate_report_async(scan_id))
-        finally:
-            loop.close()
+        return asyncio.run(_generate_report_async(scan_id))
     except Exception as exc:
         logger.error("report_task_error", scan_id=scan_id, error=str(exc))
         raise self.retry(exc=exc)
@@ -34,10 +30,13 @@ def generate_report(self, scan_id: str) -> dict:
 
 async def _generate_report_async(scan_id: str) -> dict:
     from app.config import settings
-    from app.core.database import AsyncSessionLocal
+    from app.core.database import engine, AsyncSessionLocal
     from app.scanner import service as scan_service
     from app.reports.generator import generate_pdf_bytes, build_report_context
     from app.reports.storage import upload_report, upload_report_local
+
+    # Dispose stale connections from forked worker process
+    await engine.dispose()
 
     scan_uuid = uuid.UUID(scan_id)
     log = logger.bind(scan_id=scan_id)

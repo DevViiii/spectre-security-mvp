@@ -225,20 +225,21 @@ export default function ScanDetailPage({
             {scan.status === "completed" && (
               <>
                 {scan.report_url ? (
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => {
+                  <a
+                    href={(() => {
                       const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-                      const url = scan.report_url.startsWith("http") ? scan.report_url : `${base}${scan.report_url}`;
-                      window.open(url, "_blank");
-                    }}
+                      return scan.report_url.startsWith("http") ? scan.report_url : `${base}${scan.report_url}`;
+                    })()}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border font-500 transition-all duration-100 focus-violet px-3 py-1.5 text-xs bg-violet/15 text-violet-glow border-violet/30 hover:bg-violet/25"
                   >
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                       <path d="M6.5 1v8M3.5 6l3 3 3-3M1 11.5h11" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     Download PDF
-                  </Button>
+                  </a>
                 ) : (
                   <Button
                     variant="secondary"
