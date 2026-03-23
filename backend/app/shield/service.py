@@ -99,6 +99,7 @@ async def list_violations(
     *,
     policy_id: uuid.UUID | None = None,
     limit: int = 50,
+    offset: int = 0,
     cursor: str | None = None,
 ) -> tuple[list[Violation], int]:
     query = select(Violation).order_by(Violation.created_at.desc()).limit(limit)
@@ -106,6 +107,8 @@ async def list_violations(
         query = query.where(Violation.policy_id == policy_id)
     if cursor:
         query = query.where(Violation.id < uuid.UUID(cursor))
+    elif offset:
+        query = query.offset(offset)
 
     result = await db.execute(query)
     violations = list(result.scalars().all())

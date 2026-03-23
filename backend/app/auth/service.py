@@ -79,3 +79,12 @@ async def list_api_keys(db: AsyncSession) -> list[ApiKey]:
         select(ApiKey).where(ApiKey.is_active == True).order_by(ApiKey.created_at.desc())
     )
     return list(result.scalars().all())
+
+
+# Aliases used by the hardened auth router
+async def create_key(db: AsyncSession, body) -> tuple[ApiKey, str]:
+    name = body.name if hasattr(body, "name") else str(body)
+    return await create_api_key(db, name)
+
+list_keys = list_api_keys
+revoke_key = revoke_api_key

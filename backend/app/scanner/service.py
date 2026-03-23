@@ -37,15 +37,22 @@ async def get_scan(db: AsyncSession, scan_id: uuid.UUID) -> Scan:
     return scan
 
 
+# Alias used by the hardened scanner router
+get_scan_with_findings = get_scan
+
+
 async def list_scans(
     db: AsyncSession,
     *,
     limit: int = 20,
+    offset: int = 0,
     cursor: str | None = None,
 ) -> tuple[list[Scan], int]:
     query = select(Scan).order_by(Scan.created_at.desc()).limit(limit)
     if cursor:
         query = query.where(Scan.id < uuid.UUID(cursor))
+    elif offset:
+        query = query.offset(offset)
 
     result = await db.execute(query)
     scans = list(result.scalars().all())

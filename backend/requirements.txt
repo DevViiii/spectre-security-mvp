@@ -16,6 +16,9 @@ celery==5.4.0
 pydantic==2.10.3
 pydantic-settings==2.7.0
 
+# ── Rate limiting ─────────────────────────────────────────────────────────
+slowapi==0.1.9
+
 # ── HTTP client (attack runner) ────────────────────────────────────────────
 httpx==0.28.1
 
