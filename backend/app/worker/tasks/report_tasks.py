@@ -22,7 +22,11 @@ logger = structlog.get_logger(__name__)
 )
 def generate_report(self, scan_id: str) -> dict:
     try:
-        return asyncio.run(_generate_report_async(scan_id))
+        loop = asyncio.new_event_loop()
+        try:
+            return loop.run_until_complete(_generate_report_async(scan_id))
+        finally:
+            loop.close()
     except Exception as exc:
         logger.error("report_task_error", scan_id=scan_id, error=str(exc))
         raise self.retry(exc=exc)

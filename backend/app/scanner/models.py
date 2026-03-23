@@ -16,6 +16,7 @@ class Scan(Base):
     name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     target_url: Mapped[str] = mapped_column(String(2048), nullable=False)
     target_api_key_hint: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    target_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
     attack_suite: Mapped[str] = mapped_column(String(50), default="full", nullable=False)
 
     # Status lifecycle: pending → running → completed | failed

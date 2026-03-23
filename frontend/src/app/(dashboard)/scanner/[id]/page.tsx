@@ -228,7 +228,11 @@ export default function ScanDetailPage({
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={() => window.open(scan.report_url, "_blank")}
+                    onClick={() => {
+                      const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+                      const url = scan.report_url.startsWith("http") ? scan.report_url : `${base}${scan.report_url}`;
+                      window.open(url, "_blank");
+                    }}
                   >
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                       <path d="M6.5 1v8M3.5 6l3 3 3-3M1 11.5h11" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />

@@ -1,6 +1,8 @@
 import uuid
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -32,7 +34,7 @@ async def generate_report(
         raise ValidationError("Report can only be generated for completed scans")
 
     from app.worker.celery_app import celery_app
-    celery_app.send_task("worker.tasks.report_tasks.generate_report", args=[str(scan_id)])
+    celery_app.send_task("worker.tasks.report_tasks.generate_report", args=[str(scan_id)], queue="reports")
 
     return ok(
         {"message": "Report generation queued", "scan_id": str(scan_id)},
@@ -61,4 +63,20 @@ async def get_report_url(
     return ok(
         {"report_url": scan.report_url, "scan_id": str(scan_id)},
         request_id=request_id,
+    )
+
+
+@router.get("/{scan_id}/download", summary="Download PDF report file (local dev)")
+async def download_report(scan_id: uuid.UUID):
+    """
+    Serves the locally-stored PDF report file directly.
+    Used in development where S3 is not configured.
+    """
+    pdf_path = Path("/app/report_files") / f"{scan_id}.pdf"
+    if not pdf_path.is_file():
+        raise ReportNotFound("Report file not found. Generate the report first.")
+    return FileResponse(
+        path=str(pdf_path),
+        media_type="application/pdf",
+        filename=f"spectre_report_{scan_id}.pdf",
     )

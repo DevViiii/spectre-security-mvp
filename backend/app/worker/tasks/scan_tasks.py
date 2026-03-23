@@ -78,6 +78,7 @@ async def _run_scan_async(scan_id: str) -> dict:
                     client=client,
                     attack=attack,
                     target_url=scan.target_url,
+                    target_api_key=scan.target_api_key,
                     scan_id=scan_uuid,
                 )
                 findings_data.append(finding)
@@ -128,6 +129,7 @@ async def _run_scan_async(scan_id: str) -> dict:
         celery_app.send_task(
             "worker.tasks.report_tasks.generate_report",
             args=[scan_id],
+            queue="reports",
         )
 
         return {
@@ -144,6 +146,7 @@ async def _execute_attack(
     attack,
     target_url: str,
     scan_id: uuid.UUID,
+    target_api_key: str | None = None,
 ) -> dict:
     """Fires a single attack at the target and classifies the response."""
     from app.scanner.classifiers import classify_response
@@ -159,6 +162,10 @@ async def _execute_attack(
     }
 
     try:
+        headers = {"Content-Type": "application/json"}
+        if target_api_key:
+            headers["Authorization"] = f"Bearer {target_api_key}"
+
         # Standard OpenAI-compatible chat completions endpoint
         response = await client.post(
             target_url,
@@ -167,7 +174,7 @@ async def _execute_attack(
                 "messages": [{"role": "user", "content": attack.payload}],
                 "max_tokens": 500,
             },
-            headers={"Content-Type": "application/json"},
+            headers=headers,
         )
         response.raise_for_status()
         data = response.json()

@@ -34,7 +34,7 @@ async def create_scan(
 
     # Enqueue the Celery job — imported here to avoid circular dependency at module load
     from app.worker.celery_app import celery_app
-    celery_app.send_task("worker.tasks.scan_tasks.run_scan", args=[str(scan.id)])
+    celery_app.send_task("worker.tasks.scan_tasks.run_scan", args=[str(scan.id)], queue="scans")
 
     return created(ScanResponse.model_validate(scan).model_dump(), request_id=request_id)
 

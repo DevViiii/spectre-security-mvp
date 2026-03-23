@@ -16,6 +16,7 @@ async def create_scan(db: AsyncSession, data: ScanCreate) -> Scan:
         name=data.name,
         target_url=str(data.target_url),
         target_api_key_hint=data.target_api_key[:8] if data.target_api_key else None,
+        target_api_key=data.target_api_key,
         attack_suite=data.attack_suite,
         status="pending",
     )

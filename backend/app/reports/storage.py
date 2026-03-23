@@ -54,12 +54,15 @@ def upload_report(pdf_bytes: bytes, scan_id: str) -> str:
 
 def upload_report_local(pdf_bytes: bytes, scan_id: str) -> str:
     """
-    Development fallback — saves PDF to /tmp and returns a local path.
+    Development fallback — saves PDF to a shared volume and returns an API download URL.
     NOT for production use.
     """
     import os
-    path = f"/tmp/spectre_report_{scan_id}.pdf"
+
+    report_dir = "/app/report_files"
+    os.makedirs(report_dir, exist_ok=True)
+    path = f"{report_dir}/{scan_id}.pdf"
     with open(path, "wb") as f:
         f.write(pdf_bytes)
     logger.info("report_saved_local", path=path)
-    return f"file://{path}"
+    return f"/reports/{scan_id}/download"
