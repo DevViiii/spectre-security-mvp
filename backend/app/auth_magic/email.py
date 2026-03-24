@@ -77,6 +77,44 @@ async def send_magic_link_email(
         return False
 
 
+async def send_admin_signup_notification(email: str, org_slug: str) -> bool:
+    """
+    Sends a notification to the admin when a new user signs up.
+    Skips silently if ADMIN_NOTIFICATION_EMAIL or RESEND_API_KEY is not set.
+    """
+    if not settings.ADMIN_NOTIFICATION_EMAIL or not settings.RESEND_API_KEY:
+        logger.info("admin_notification_skipped", reason="not configured", new_user=email)
+        return False
+
+    from datetime import datetime, timezone
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                RESEND_API_URL,
+                headers={
+                    "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "from": settings.EMAIL_FROM,
+                    "to": [settings.ADMIN_NOTIFICATION_EMAIL],
+                    "subject": "New Spectre Security signup",
+                    "html": f"<p>New user signed up: <strong>{email}</strong> at {timestamp}. Organization: <strong>{org_slug}</strong></p>",
+                },
+            )
+            if response.status_code == 200:
+                logger.info("admin_notification_sent", new_user=email)
+                return True
+            else:
+                logger.error("admin_notification_failed", status=response.status_code, body=response.text[:200])
+                return False
+    except Exception as exc:
+        logger.error("admin_notification_error", error=str(exc))
+        return False
+
+
 def _build_email_html(magic_link: str, is_new_user: bool) -> str:
     greeting = "Welcome to Spectre Security" if is_new_user else "Your Spectre Security login link"
     intro = (

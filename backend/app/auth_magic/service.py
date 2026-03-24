@@ -142,6 +142,14 @@ async def verify_magic_link(
     await db.commit()
 
     logger.info("magic_link_verified_new_user", email=email, org_id=str(org.id))
+
+    # Notify admin of new signup (fire and forget)
+    from app.auth_magic.email import send_admin_signup_notification
+    try:
+        await send_admin_signup_notification(email=email, org_slug=org.slug)
+    except Exception:
+        pass  # Never block signup on notification failure
+
     return raw_key, True
 
 

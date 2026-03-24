@@ -85,6 +85,7 @@ class Settings(BaseSettings):
     RESEND_API_KEY: str = ""
     EMAIL_FROM: str = "onboarding@resend.dev"
     FRONTEND_URL: str = "http://localhost:3000"
+    ADMIN_NOTIFICATION_EMAIL: str = ""
 
     # ── Logging ────────────────────────────────────────────────────────────
     LOG_LEVEL: str = "INFO"
