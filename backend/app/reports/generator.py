@@ -42,8 +42,25 @@ def generate_pdf_bytes(scan_data: dict) -> bytes:
 
 def build_report_context(scan, findings: list) -> dict:
     """Shapes a Scan ORM object + findings into the template context dict."""
+    from datetime import datetime, timezone
+    from app.scanner.attacks.loader import OWASP_CATEGORY_MAP
+
     severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
     sorted_findings = sorted(findings, key=lambda f: severity_order.get(f.severity, 99))
+
+    # Enrich findings with OWASP data and field aliases expected by template
+    enriched = []
+    for f in sorted_findings:
+        owasp_default = OWASP_CATEGORY_MAP.get(f.category, ("", ""))
+        finding_dict = _to_dict(f)
+        finding_dict.setdefault("owasp", owasp_default[0])
+        finding_dict.setdefault("owasp_name", owasp_default[1])
+        finding_dict.setdefault("risk", "")
+        finding_dict.setdefault("remediation", [])
+        finding_dict.setdefault("attack_name", f.attack_id)
+        # Template uses 'response' not 'response_excerpt'
+        finding_dict["response"] = finding_dict.get("response_excerpt", "")
+        enriched.append(type("Finding", (), finding_dict)())
 
     breakdown: dict[str, dict] = {}
     for f in sorted_findings:
@@ -52,7 +69,16 @@ def build_report_context(scan, findings: list) -> dict:
         breakdown[f.severity]["total"] += 1
         breakdown[f.severity][f.status if f.status in ("passed", "failed") else "failed"] += 1
 
+    # Wrap scan so template can use scan.id[:8] (UUID needs to be a string)
+    scan_dict = _to_dict(scan)
+    scan_dict["id"] = str(scan.id)
+    scan_proxy = type("Scan", (), scan_dict)()
+
     return {
+        "scan": scan_proxy,
+        "findings": enriched,
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        # Keep legacy fields for backwards compatibility
         "scan_id": str(scan.id),
         "scan_name": scan.name or f"Scan {str(scan.id)[:8]}",
         "target_url": scan.target_url,
@@ -63,10 +89,16 @@ def build_report_context(scan, findings: list) -> dict:
         "failed_attacks": scan.failed_attacks,
         "created_at": scan.created_at.strftime("%Y-%m-%d %H:%M UTC"),
         "completed_at": scan.completed_at.strftime("%Y-%m-%d %H:%M UTC") if scan.completed_at else "—",
-        "findings": sorted_findings,
         "breakdown": breakdown,
         "grade_color": _grade_color(scan.grade),
     }
+
+
+def _to_dict(obj) -> dict:
+    """Convert an ORM object or dict-like to a plain dict."""
+    if hasattr(obj, "__dict__"):
+        return {k: v for k, v in obj.__dict__.items() if not k.startswith("_")}
+    return dict(obj)
 
 
 def _grade_color(grade: str | None) -> str:

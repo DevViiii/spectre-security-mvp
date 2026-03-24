@@ -156,12 +156,17 @@ async def _execute_attack(
 
     base = {
         "attack_id": attack.id,
+        "attack_name": attack.name,
         "category": attack.category,
         "severity": attack.severity,
         "payload": attack.payload,
         "response_excerpt": None,
         "classifier_used": None,
         "status": "error",
+        "owasp": attack.owasp,
+        "owasp_name": attack.owasp_name,
+        "risk": attack.risk,
+        "remediation": attack.remediation,
     }
 
     try:

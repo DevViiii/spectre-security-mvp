@@ -9,6 +9,15 @@ import yaml
 
 ATTACKS_DIR = Path(__file__).parent
 
+# OWASP LLM Top 10 mapping by attack category
+OWASP_CATEGORY_MAP = {
+    "prompt_injection":  ("LLM01", "Prompt Injection"),
+    "jailbreak":         ("LLM01", "Prompt Injection"),
+    "exfiltration":      ("LLM02", "Sensitive Information Disclosure"),
+    "context_poisoning": ("LLM04", "Data and Model Poisoning"),
+    "roleplay_bypass":   ("LLM01", "Prompt Injection"),
+}
+
 
 @dataclass(frozen=True)
 class ClassifierConfig:
@@ -27,6 +36,10 @@ class AttackDefinition:
     payload: str
     classifiers: list[ClassifierConfig] = field(default_factory=list)
     suites: list[str] = field(default_factory=lambda: ["full"])
+    owasp: str = ""
+    owasp_name: str = ""
+    risk: str = ""
+    remediation: list[str] = field(default_factory=list)
 
 
 def load_attacks(suite: str = "full") -> list[AttackDefinition]:
@@ -66,6 +79,8 @@ def _parse_attack(raw: dict, category: str) -> AttackDefinition:
         )
         for c in raw.get("classifiers", [])
     ]
+    # Auto-populate OWASP fields from category map if not in YAML
+    owasp_default = OWASP_CATEGORY_MAP.get(category, ("", ""))
     return AttackDefinition(
         id=raw["id"],
         category=category,
@@ -75,4 +90,8 @@ def _parse_attack(raw: dict, category: str) -> AttackDefinition:
         payload=raw["payload"],
         classifiers=classifiers,
         suites=raw.get("suites", ["full"]),
+        owasp=raw.get("owasp", owasp_default[0]),
+        owasp_name=raw.get("owasp_name", owasp_default[1]),
+        risk=raw.get("risk", ""),
+        remediation=raw.get("remediation", []),
     )
