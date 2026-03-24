@@ -397,21 +397,28 @@ export default function LandingPage() {
             fontWeight: 700,
             lineHeight: 1.05,
             letterSpacing: "-2px",
-            color: "#f4f4f5",
+            color: "#ffffff",
             marginBottom: "24px",
             textShadow: "0 0 60px rgba(124,58,237,0.3)",
           }}>
-            Security for the
+            Your AI app is vulnerable.
             <br />
-            <span style={{ color: "#7c3aed" }}>AI-native stack</span>
+            <span style={{ color: "#7c3aed" }}>We&apos;ll prove it — then fix it.</span>
           </h1>
 
           <p style={{
-            fontSize: "18px", color: "#71717a", maxWidth: "560px",
+            fontSize: "22px", color: "#a1a1aa", fontWeight: 600,
+            letterSpacing: "-0.5px", marginBottom: "16px",
+          }}>
+            The average LLM app scores Grade F. What does yours score?
+          </p>
+
+          <p style={{
+            fontSize: "16px", color: "#71717a", maxWidth: "560px",
             margin: "0 auto 40px", lineHeight: 1.7,
           }}>
-            Test your LLM applications for vulnerabilities before deployment.
-            Protect them in production with real-time DLP — under 30ms.
+            We scanned a raw GPT-4 endpoint and found 22 critical vulnerabilities in 4 minutes.
+            Run your first scan free — no credit card required.
           </p>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
