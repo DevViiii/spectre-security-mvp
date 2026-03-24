@@ -13,7 +13,7 @@ redis[asyncio]==5.2.1
 celery==5.4.0
 
 # ── Settings & validation ──────────────────────────────────────────────────
-pydantic==2.10.3
+pydantic[email]==2.10.3
 pydantic-settings==2.7.0
 
 # ── Rate limiting ─────────────────────────────────────────────────────────

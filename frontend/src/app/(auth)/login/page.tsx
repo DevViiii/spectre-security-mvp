@@ -2,122 +2,166 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiClient } from "@/lib/api/client";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [key, setKey] = useState("");
+  const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!key.trim()) return;
+    if (!apiKey.trim()) return;
+
     setLoading(true);
     setError("");
 
     try {
-      // Verify the key is valid by hitting a protected endpoint
-      await apiClient.get("/auth", {
-        headers: { "X-Api-Key": key.trim() },
+      const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+      const res = await fetch(`${apiBase}/health`, {
+        headers: { "X-Api-Key": apiKey.trim() },
       });
-      // Store in cookie (httpOnly would be ideal — for pilot, js-accessible is fine)
-      document.cookie = `spectre_api_key=${key.trim()}; path=/; max-age=86400; SameSite=Strict`;
-      router.push("/scanner");
+
+      if (res.ok) {
+        document.cookie = `spectre_api_key=${apiKey.trim()}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+        router.push("/overview");
+      } else {
+        setError("Invalid API key. Check your key and try again.");
+      }
     } catch {
-      setError("Invalid API key. Check your credentials and try again.");
+      setError("Unable to connect to the API.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-obsidian-950 bg-grid-obsidian bg-grid flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Violet glow backdrop */}
-      <div
-        aria-hidden
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full opacity-[0.06]"
-        style={{ background: "radial-gradient(ellipse, #7c3aed 0%, transparent 70%)" }}
-      />
+    <div style={{
+      minHeight: "100vh", background: "#060608",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "24px", position: "relative", overflow: "hidden",
+    }}>
+      <svg style={{ position: "absolute", inset: 0, opacity: 0.03, pointerEvents: "none" }} width="100%" height="100%">
+        <defs>
+          <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#7c3aed" strokeWidth="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)"/>
+      </svg>
 
-      <div className="w-full max-w-sm animate-slide-up relative z-10">
-        {/* Wordmark */}
-        <div className="mb-10 text-center">
-          <div className="inline-flex items-center gap-2 mb-2">
-            {/* Ghost icon */}
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <path
-                d="M14 3C8.48 3 4 7.48 4 13v10l3-2.5 3 2.5 3-2.5 3 2.5 3-2.5 3 2.5V13c0-5.52-4.48-10-10-10z"
-                fill="#7c3aed" opacity="0.9"
-              />
-              <circle cx="10" cy="13" r="1.5" fill="#0d0d12" />
-              <circle cx="18" cy="13" r="1.5" fill="#0d0d12" />
-            </svg>
-            <span className="font-display text-2xl font-700 tracking-tight text-zinc-50">
-              Spectre
-              <span className="text-violet"> Security</span>
+      <div style={{ width: "100%", maxWidth: "400px", position: "relative", zIndex: 1 }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <Link href="/" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "10px" }}>
+            <div style={{
+              width: "40px", height: "40px", background: "#7c3aed",
+              borderRadius: "10px", display: "flex", alignItems: "center",
+              justifyContent: "center", fontSize: "20px", fontWeight: 800, color: "white",
+            }}>S</div>
+            <span style={{ fontSize: "18px", fontWeight: 700, color: "#f4f4f5", letterSpacing: "-0.3px" }}>
+              Spectre <span style={{ color: "#7c3aed" }}>Security</span>
             </span>
-          </div>
-          <p className="text-xs text-zinc-500 tracking-widest uppercase">
-            Operator Console
-          </p>
+          </Link>
         </div>
 
-        {/* Card */}
-        <div className="bg-obsidian-900 border border-obsidian-600 rounded-xl p-8 shadow-violet">
-          <h1 className="font-display text-lg font-600 text-zinc-100 mb-1">
-            Sign in
-          </h1>
-          <p className="text-sm text-zinc-500 mb-6">
-            Enter your API key to access the dashboard.
-          </p>
+        <div style={{
+          background: "#0d0d1a", border: "1px solid #1c1c2e",
+          borderRadius: "16px", padding: "36px",
+        }}>
+          {/* Magic link CTA — primary */}
+          <div style={{
+            background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)",
+            borderRadius: "10px", padding: "16px", marginBottom: "24px", textAlign: "center",
+          }}>
+            <p style={{ fontSize: "13px", color: "#a1a1aa", marginBottom: "12px", lineHeight: 1.5 }}>
+              New to Spectre Security? Get instant access with just your email — no password needed.
+            </p>
+            <Link
+              href="/signup"
+              style={{
+                display: "inline-block", background: "#7c3aed", color: "white",
+                padding: "10px 20px", borderRadius: "8px", textDecoration: "none",
+                fontSize: "14px", fontWeight: 600,
+              }}
+            >
+              Get started free →
+            </Link>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs text-zinc-400 mb-1.5 tracking-wide uppercase">
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
+            <div style={{ flex: 1, height: "1px", background: "#1c1c2e" }}/>
+            <span style={{ fontSize: "11px", color: "#3f3f46", letterSpacing: "0.05em" }}>OR</span>
+            <div style={{ flex: 1, height: "1px", background: "#1c1c2e" }}/>
+          </div>
+
+          {/* API key login — secondary */}
+          <h2 style={{
+            fontSize: "16px", fontWeight: 600, color: "#71717a",
+            marginBottom: "16px",
+          }}>
+            Sign in with API key
+          </h2>
+
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: "16px" }}>
+              <label style={{
+                display: "block", fontSize: "11px", fontWeight: 600,
+                color: "#52525b", marginBottom: "6px", letterSpacing: "0.04em",
+                textTransform: "uppercase",
+              }}>
                 API Key
               </label>
               <input
                 type="password"
-                value={key}
-                onChange={(e) => setKey(e.target.value)}
+                value={apiKey}
+                onChange={e => setApiKey(e.target.value)}
                 placeholder="sk-spectre-..."
-                autoComplete="current-password"
-                spellCheck={false}
-                className="w-full bg-obsidian-800 border border-obsidian-500 rounded-lg px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 font-mono focus-violet transition-colors focus:border-violet/50 outline-none"
+                style={{
+                  width: "100%", padding: "11px 14px",
+                  background: "#060608", border: "1px solid #27272a",
+                  borderRadius: "8px", color: "#f4f4f5", fontSize: "14px",
+                  outline: "none", boxSizing: "border-box", fontFamily: "monospace",
+                }}
+                onFocus={e => (e.target.style.borderColor = "#7c3aed")}
+                onBlur={e => (e.target.style.borderColor = "#27272a")}
               />
             </div>
 
             {error && (
-              <div className="flex items-start gap-2 bg-red-950/40 border border-red-900/60 rounded-lg px-3 py-2.5">
-                <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 16 16">
-                  <path d="M8 5v4M8 11v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" />
-                </svg>
-                <p className="text-xs text-red-400">{error}</p>
+              <div style={{
+                background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
+                borderRadius: "8px", padding: "10px 14px",
+                fontSize: "13px", color: "#f87171", marginBottom: "16px",
+              }}>
+                {error}
               </div>
             )}
 
             <button
               type="submit"
-              disabled={loading || !key.trim()}
-              className="w-full bg-violet hover:bg-violet-dim disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg px-4 py-2.5 text-sm font-500 transition-all duration-150 focus-violet"
+              disabled={loading || !apiKey.trim()}
+              style={{
+                width: "100%", padding: "11px",
+                background: "transparent",
+                color: loading || !apiKey.trim() ? "#3f3f46" : "#71717a",
+                border: "1px solid #27272a", borderRadius: "8px",
+                fontSize: "14px", fontWeight: 500,
+                cursor: loading ? "wait" : "pointer",
+              }}
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 16 16" fill="none">
-                    <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" strokeOpacity="0.3" />
-                    <path d="M8 2a6 6 0 0 1 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                  Verifying…
-                </span>
-              ) : "Access console"}
+              {loading ? "Signing in..." : "Sign in with key"}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-xs text-zinc-600 mt-6">
-          No key? Contact your Spectre administrator.
+        <p style={{ textAlign: "center", fontSize: "12px", color: "#27272a", marginTop: "16px" }}>
+          Don't have an account?{" "}
+          <Link href="/signup" style={{ color: "#7c3aed", textDecoration: "none" }}>
+            Get started free
+          </Link>
         </p>
       </div>
     </div>

@@ -12,5 +12,6 @@ export default async function RootPage() {
   }
 
   // Unauthenticated users see the landing page
+  // All CTAs on landing page now point to /signup (magic link flow)
   return <LandingPage />;
 }

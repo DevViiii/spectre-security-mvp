@@ -39,6 +39,7 @@ from app.reports.router import router as reports_router
 from app.rules.router import router as rules_router
 from app.scanner.router import router as scanner_router
 from app.shield.router import router as shield_router
+from app.auth_magic.router import router as magic_router
 
 # Model imports — required for Alembic to detect all tables
 import app.organizations.model          # noqa: F401
@@ -104,6 +105,7 @@ def create_app() -> FastAPI:
     app.include_router(audit_router,         prefix="/audit",         tags=["audit"])
     app.include_router(organizations_router, prefix="/organizations", tags=["organizations"])
     app.include_router(rules_router,         prefix="/rules",         tags=["rules"])
+    app.include_router(magic_router,         prefix="/auth/magic",    tags=["magic-auth"])
 
     return app
 

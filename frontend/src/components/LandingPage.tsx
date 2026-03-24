@@ -376,7 +376,7 @@ export default function LandingPage() {
               onMouseLeave={e => (e.currentTarget.style.color = "#71717a")}>
               Pricing
             </a>
-            <Link href="/login" style={{
+            <Link href="/signup" style={{
               fontSize: "14px", fontWeight: 600, color: "white",
               background: "#7c3aed", padding: "8px 18px", borderRadius: "8px",
               textDecoration: "none",
@@ -415,7 +415,7 @@ export default function LandingPage() {
           </p>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
-            <Link href="/login" style={{
+            <Link href="/signup" style={{
               fontSize: "15px", fontWeight: 600, color: "white",
               background: "#7c3aed", padding: "14px 28px", borderRadius: "10px",
               textDecoration: "none",
@@ -606,7 +606,7 @@ export default function LandingPage() {
                 </ul>
 
                 <div>
-                  <Link href="/login" style={{
+                  <Link href="/signup" style={{
                     display: "block", textAlign: "center", fontSize: "14px", fontWeight: 600,
                     padding: "12px", borderRadius: "10px", textDecoration: "none",
                     background: plan.highlight ? "#7c3aed" : "transparent",
@@ -638,7 +638,7 @@ export default function LandingPage() {
           <p style={{ color: "#71717a", marginBottom: "32px", fontSize: "16px" }}>
             Run your first scan free. No credit card required.
           </p>
-          <Link href="/login" style={{
+          <Link href="/signup" style={{
             display: "inline-block", fontSize: "15px", fontWeight: 600,
             color: "white", background: "#7c3aed",
             padding: "14px 32px", borderRadius: "10px", textDecoration: "none",

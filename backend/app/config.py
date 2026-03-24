@@ -81,6 +81,11 @@ class Settings(BaseSettings):
     S3_BUCKET_NAME: str = ""
     S3_REPORT_URL_EXPIRY: int = 3600
 
+    # ── Magic link auth ────────────────────────────────────────────────────
+    RESEND_API_KEY: str = ""
+    EMAIL_FROM: str = "onboarding@resend.dev"
+    FRONTEND_URL: str = "http://localhost:3000"
+
     # ── Logging ────────────────────────────────────────────────────────────
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: Literal["json", "pretty"] = "pretty"
