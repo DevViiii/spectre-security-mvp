@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { clsx } from "clsx";
 
 const nav = [
@@ -105,5 +106,65 @@ export function Sidebar() {
         <span className="font-mono text-[10px] text-zinc-600">v0.1.0-mvp</span>
       </div>
     </aside>
+  );
+}
+
+
+export function MobileNav() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <div className="flex items-center justify-between px-4 h-12 bg-obsidian-900 border-b border-obsidian-600">
+        <div className="flex items-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 28 28" fill="none">
+            <path d="M14 3C8.48 3 4 7.48 4 13v10l3-2.5 3 2.5 3-2.5 3 2.5 3-2.5 3 2.5V13c0-5.52-4.48-10-10-10z" fill="#7c3aed" opacity="0.9"/>
+            <circle cx="10" cy="13" r="1.5" fill="#0d0d12"/>
+            <circle cx="18" cy="13" r="1.5" fill="#0d0d12"/>
+          </svg>
+          <span className="font-display text-xs font-600 text-zinc-100 tracking-tight">
+            Spectre<span className="text-violet"> Security</span>
+          </span>
+        </div>
+        <button
+          onClick={() => setOpen(!open)}
+          className="p-1 text-zinc-400 hover:text-zinc-200"
+        >
+          {open ? (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          )}
+        </button>
+      </div>
+      {open && (
+        <div className="bg-obsidian-900 border-b border-obsidian-600 px-3 py-2 space-y-0.5">
+          {nav.map((item) => {
+            const active = pathname === item.href || pathname.startsWith(item.href + "/");
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className={clsx(
+                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-100",
+                  active
+                    ? "bg-violet/10 text-violet border border-violet/20"
+                    : "text-zinc-500 hover:text-zinc-300 hover:bg-obsidian-700"
+                )}
+              >
+                <span className={active ? "text-violet" : "text-zinc-600"}>{item.icon}</span>
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </>
   );
 }

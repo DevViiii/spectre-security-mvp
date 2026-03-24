@@ -365,7 +365,7 @@ export default function LandingPage() {
           </div>
 
           {/* Right side nav */}
-          <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
+          <div className="sp-nav-links">
             <a href="#how-it-works" style={{ fontSize: "14px", color: "#71717a", textDecoration: "none" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#d4d4d8")}
               onMouseLeave={e => (e.currentTarget.style.color = "#71717a")}>
@@ -441,12 +441,26 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Responsive overrides */}
+      <style>{`
+        .sp-stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:32px; text-align:center; }
+        .sp-pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+        .sp-steps-step { display:flex; gap:28px; align-items:flex-start; }
+        .sp-nav-links { display:flex; align-items:center; gap:32px; }
+        @media (max-width:768px) {
+          .sp-stats-grid { grid-template-columns:repeat(2,1fr); gap:20px; }
+          .sp-pricing-grid { grid-template-columns:1fr; max-width:400px; margin:0 auto; }
+          .sp-steps-step { flex-direction:column; gap:12px; }
+          .sp-nav-links a:not(:last-child) { display:none; }
+        }
+      `}</style>
+
       {/* Stats */}
       <section style={{
         padding: "40px 24px", borderTop: "1px solid rgba(255,255,255,0.04)",
         borderBottom: "1px solid rgba(255,255,255,0.04)", background: "rgba(0,0,0,0.2)",
       }}>
-        <div style={{ maxWidth: "800px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "32px", textAlign: "center" }}>
+        <div className="sp-stats-grid" style={{ maxWidth: "800px", margin: "0 auto" }}>
           {[
             { value: "43", label: "Attack vectors" },
             { value: "67", label: "Detection rules" },
@@ -506,8 +520,7 @@ export default function LandingPage() {
                 desc: "Install the Spectre Shield Python SDK with a single import. Every prompt sent to your LLM and every response returned is inspected in real time against 67 detection rules — covering credential leakage, injection attempts, jailbreak patterns, and custom DLP policies you define. Violations are logged, blocked, or redacted based on your policy configuration. Inspection latency is under 30ms p95.",
               },
             ].map((step) => (
-              <div key={step.num} style={{
-                display: "flex", gap: "28px", alignItems: "flex-start",
+              <div key={step.num} className="sp-steps-step" style={{
                 background: "rgba(9,9,11,0.6)", border: "1px solid #1c1c1e",
                 borderRadius: "16px", padding: "28px",
                 backdropFilter: "blur(8px)",
@@ -569,7 +582,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "16px" }}>
+          <div className="sp-pricing-grid">
             {PLANS.map(plan => (
               <div key={plan.name} style={{
                 position: "relative",
