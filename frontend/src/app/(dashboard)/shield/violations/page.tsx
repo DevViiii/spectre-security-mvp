@@ -40,7 +40,7 @@ function ViolationRow({ v }: { v: any }) {
   return (
     <>
       <tr
-        className="border-b border-obsidian-700 hover:bg-obsidian-800/30 cursor-pointer transition-colors"
+        className="border-b border-[#1a1a1f] hover:bg-[#0d0d11]/30 cursor-pointer transition-colors"
         onClick={() => setExpanded((e) => !e)}
       >
         <td className="px-4 py-3 text-xs text-zinc-400">{formatRelative(v.created_at)}</td>
@@ -50,7 +50,7 @@ function ViolationRow({ v }: { v: any }) {
             "text-[11px] font-mono uppercase tracking-wide px-2 py-0.5 rounded border",
             v.direction === "input"
               ? "text-blue-400 bg-blue-950/50 border-blue-900/60"
-              : "text-purple-400 bg-purple-950/50 border-purple-900/60"
+              : "text-[#6ef2ff] bg-[rgba(110,242,255,0.08)] border-[rgba(110,242,255,0.15)]"
           )}>
             {v.direction}
           </span>
@@ -75,7 +75,7 @@ function ViolationRow({ v }: { v: any }) {
         </td>
       </tr>
       {expanded && (
-        <tr className="border-b border-obsidian-700 bg-obsidian-900/60">
+        <tr className="border-b border-[#1a1a1f] bg-[#0d0d11]">
           <td colSpan={7} className="px-4 py-4">
             <div className="space-y-2 text-xs">
               <div className="grid grid-cols-3 gap-3">
@@ -95,7 +95,7 @@ function ViolationRow({ v }: { v: any }) {
               {v.context_excerpt && (
                 <div>
                   <p className="text-zinc-500 uppercase tracking-wide mb-1">Context excerpt</p>
-                  <pre className="bg-obsidian-800 border border-obsidian-600 rounded-lg p-3 text-zinc-300 whitespace-pre-wrap break-words font-mono leading-relaxed">
+                  <pre className="bg-[#0d0d11] border border-[#1a1a1f] rounded-lg p-3 text-zinc-300 whitespace-pre-wrap break-words font-mono leading-relaxed">
                     {v.context_excerpt}
                   </pre>
                 </div>
@@ -132,7 +132,7 @@ export default function ViolationsPage() {
             <span>/</span>
             <span className="text-zinc-300">Violations</span>
           </div>
-          <h2 className="font-display text-lg font-600 text-zinc-100">Violation log</h2>
+          <h2 className="font-display text-lg font-600 text-[#f0f0f2]">Violation log</h2>
           <p className="text-xs text-zinc-500 mt-0.5">{filtered.length} events</p>
         </div>
         <Button
@@ -158,7 +158,7 @@ export default function ViolationsPage() {
             className={clsx(
               "px-2.5 py-1 rounded text-xs capitalize transition-colors",
               actionFilter === f
-                ? "bg-violet/15 text-violet border border-violet/30"
+                ? "bg-[rgba(110,242,255,0.1)] text-[#6ef2ff] border border-[rgba(110,242,255,0.2)]"
                 : "text-zinc-500 hover:text-zinc-300"
             )}
           >
@@ -174,7 +174,7 @@ export default function ViolationsPage() {
             className={clsx(
               "px-2.5 py-1 rounded text-xs capitalize transition-colors",
               directionFilter === f
-                ? "bg-violet/15 text-violet border border-violet/30"
+                ? "bg-[rgba(110,242,255,0.1)] text-[#6ef2ff] border border-[rgba(110,242,255,0.2)]"
                 : "text-zinc-500 hover:text-zinc-300"
             )}
           >
@@ -195,7 +195,7 @@ export default function ViolationsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-obsidian-700">
+                <tr className="border-b border-[#1a1a1f]">
                   {["Time", "Policy", "Direction", "Action", "Pattern", "Context", ""].map((h) => (
                     <th key={h} className="px-4 py-2.5 text-left text-[11px] text-zinc-500 uppercase tracking-wide font-500">
                       {h}

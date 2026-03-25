@@ -34,8 +34,18 @@ html {
 
 /* ── Selection ───────────────────────────────────────────────────────── */
 ::selection {
-  background: rgba(124, 58, 237, 0.3);
-  color: #e9d5ff;
+  background: rgba(110, 242, 255, 0.2);
+  color: #edf4ff;
+}
+
+body {
+  background: #050508;
+  color: #f0f0f2;
+}
+
+/* ── Spin animation ──────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ── Typography ──────────────────────────────────────────────────────── */

@@ -2,43 +2,54 @@
 
 import { usePathname, useRouter } from "next/navigation";
 
-const PAGE_TITLES: Record<string, string> = {
+const TITLES: Record<string, string> = {
+  "/overview": "Overview",
   "/scanner": "Scanner",
   "/shield": "Shield",
-  "/shield/violations": "Violation log",
+  "/shield/violations": "Violations",
+  "/reports": "Reports",
   "/settings": "Settings",
 };
-
-function getTitle(pathname: string): string {
-  // Scan detail pages
-  if (pathname.match(/^\/scanner\/[^/]+$/)) return "Scan detail";
-  return PAGE_TITLES[pathname] ?? "Spectre Security";
-}
 
 export function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
-  const title = getTitle(pathname);
 
-  function handleSignOut() {
+  const title = Object.entries(TITLES).find(([path]) =>
+    pathname === path || pathname.startsWith(path + "/")
+  )?.[1] ?? "Spectre Security";
+
+  function signOut() {
     document.cookie = "spectre_api_key=; path=/; max-age=0";
-    router.push("/login");
+    router.push("/");
   }
 
   return (
-    <header className="h-14 flex items-center justify-between px-6 bg-obsidian-900 border-b border-obsidian-600 shrink-0">
-      <h1 className="font-display text-sm font-600 text-zinc-300 tracking-wide">
-        {title}
-      </h1>
+    <header style={{
+      height: "52px",
+      background: "#070709",
+      borderBottom: "1px solid #111115",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "0 20px",
+      flexShrink: 0,
+    }}>
+      <span style={{ fontSize: "14px", fontWeight: 500, color: "#f0f0f2" }}>{title}</span>
       <button
-        onClick={handleSignOut}
-        className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1.5"
+        onClick={signOut}
+        style={{
+          display: "flex", alignItems: "center", gap: "6px",
+          background: "transparent", border: "none",
+          fontSize: "12px", color: "#3f3f46", cursor: "pointer",
+          padding: "5px 8px", borderRadius: "5px",
+          transition: "color 0.15s",
+        }}
+        onMouseEnter={e => (e.currentTarget.style.color = "#a1a1aa")}
+        onMouseLeave={e => (e.currentTarget.style.color = "#3f3f46")}
       >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path
-            d="M5.5 2H3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h2.5M9.5 9.5l2.5-2.5-2.5-2.5M12 7H5.5"
-            stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"
-          />
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M5 2H2.5A1.5 1.5 0 001 3.5v6A1.5 1.5 0 002.5 11H5M9 9.5l2.5-3L9 3.5M11.5 6.5H5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         Sign out
       </button>

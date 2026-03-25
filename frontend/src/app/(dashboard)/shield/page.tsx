@@ -74,9 +74,9 @@ function PolicyFormModal({ onClose }: { onClose: () => void }) {
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(6,6,8,0.85)", backdropFilter: "blur(4px)" }}
     >
-      <div className="bg-obsidian-900 border border-obsidian-500 rounded-xl w-full max-w-lg shadow-violet animate-slide-up max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-obsidian-600 sticky top-0 bg-obsidian-900">
-          <h2 className="font-display text-sm font-600 text-zinc-100">New DLP policy</h2>
+      <div className="bg-[#0d0d11] border border-[#1a1a1f] rounded-xl w-full max-w-lg shadow-lg animate-slide-up max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1a1a1f] sticky top-0 bg-[#0d0d11]">
+          <h2 className="font-display text-sm font-600 text-[#f0f0f2]">New DLP policy</h2>
           <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -93,7 +93,7 @@ function PolicyFormModal({ onClose }: { onClose: () => void }) {
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="Block credit card numbers"
-              className="w-full bg-obsidian-800 border border-obsidian-500 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus-violet"
+              className="w-full bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-sm text-[#f0f0f2] placeholder-zinc-600 outline-none"
             />
           </div>
 
@@ -109,8 +109,8 @@ function PolicyFormModal({ onClose }: { onClose: () => void }) {
                   className={clsx(
                     "px-3 py-2 rounded-lg text-xs border transition-all",
                     ruleType === t
-                      ? "bg-violet/10 text-violet border-violet/30"
-                      : "bg-obsidian-800 text-zinc-400 border-obsidian-500 hover:text-zinc-200"
+                      ? "bg-[rgba(110,242,255,0.08)] text-[#6ef2ff] border-[rgba(110,242,255,0.2)]"
+                      : "bg-[#0d0d11] text-zinc-400 border-[#1a1a1f] hover:text-zinc-200"
                   )}
                 >
                   {RULE_TYPE_INFO[t].label}
@@ -129,7 +129,7 @@ function PolicyFormModal({ onClose }: { onClose: () => void }) {
                 value={form.pattern}
                 onChange={(e) => setForm((f) => ({ ...f, pattern: e.target.value }))}
                 placeholder="\b\d{3}-\d{2}-\d{4}\b"
-                className="w-full bg-obsidian-800 border border-obsidian-500 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 font-mono outline-none focus-violet"
+                className="w-full bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-sm text-[#f0f0f2] placeholder-zinc-600 font-mono outline-none"
               />
             </div>
           )}
@@ -141,7 +141,7 @@ function PolicyFormModal({ onClose }: { onClose: () => void }) {
                 value={form.entity_types}
                 onChange={(e) => setForm((f) => ({ ...f, entity_types: e.target.value }))}
                 placeholder="PERSON,ORG,GPE,LOC"
-                className="w-full bg-obsidian-800 border border-obsidian-500 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 font-mono outline-none focus-violet"
+                className="w-full bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-sm text-[#f0f0f2] placeholder-zinc-600 font-mono outline-none"
               />
             </div>
           )}
@@ -154,7 +154,7 @@ function PolicyFormModal({ onClose }: { onClose: () => void }) {
                 onChange={(e) => setForm((f) => ({ ...f, terms: e.target.value }))}
                 placeholder="PROJECT FALCON, Operation Bluebird, CONFIDENTIAL"
                 rows={3}
-                className="w-full bg-obsidian-800 border border-obsidian-500 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus-violet resize-none"
+                className="w-full bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-sm text-[#f0f0f2] placeholder-zinc-600 outline-none resize-none"
               />
             </div>
           )}
@@ -166,7 +166,7 @@ function PolicyFormModal({ onClose }: { onClose: () => void }) {
               <select
                 value={form.action}
                 onChange={(e) => setForm((f) => ({ ...f, action: e.target.value as any }))}
-                className="w-full bg-obsidian-800 border border-obsidian-500 rounded-lg px-3 py-2 text-sm text-zinc-200 outline-none focus-violet"
+                className="w-full bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-sm text-zinc-200 outline-none"
               >
                 <option value="alert">Alert (log only)</option>
                 <option value="redact">Redact (replace with [REDACTED])</option>
@@ -178,7 +178,7 @@ function PolicyFormModal({ onClose }: { onClose: () => void }) {
               <select
                 value={form.applies_to}
                 onChange={(e) => setForm((f) => ({ ...f, applies_to: e.target.value as any }))}
-                className="w-full bg-obsidian-800 border border-obsidian-500 rounded-lg px-3 py-2 text-sm text-zinc-200 outline-none focus-violet"
+                className="w-full bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-sm text-zinc-200 outline-none"
               >
                 <option value="both">Input and output</option>
                 <option value="input">Input only</option>
@@ -225,7 +225,7 @@ function PolicyRow({ policy }: { policy: any }) {
   }
 
   return (
-    <tr className="border-b border-obsidian-700 hover:bg-obsidian-800/30 transition-colors">
+    <tr className="border-b border-[#1a1a1f] hover:bg-[#0d0d11]/30 transition-colors">
       <td className="px-4 py-3.5">
         <p className="text-sm font-500 text-zinc-200">{policy.name}</p>
         {policy.description && (
@@ -277,7 +277,7 @@ export default function ShieldPage() {
     <div className="max-w-5xl mx-auto space-y-5 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-display text-lg font-600 text-zinc-100">DLP policies</h2>
+          <h2 className="font-display text-lg font-600 text-[#f0f0f2]">DLP policies</h2>
           <p className="text-xs text-zinc-500 mt-0.5">
             {policies.filter((p: any) => p.is_active).length} active of {policies.length} total
           </p>
@@ -316,7 +316,7 @@ export default function ShieldPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-obsidian-700">
+                <tr className="border-b border-[#1a1a1f]">
                   {["Policy", "Type", "Action", "Applies to", "Created", "Active", ""].map((h) => (
                     <th key={h} className="px-4 py-2.5 text-left text-[11px] text-zinc-500 uppercase tracking-wide font-500">
                       {h}

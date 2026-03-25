@@ -33,7 +33,7 @@ function NewKeyCallout({ rawKey, onDismiss }: { rawKey: string; onDismiss: () =>
         </button>
       </div>
       <div className="flex items-center gap-2">
-        <code className="flex-1 bg-obsidian-800 border border-obsidian-600 rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 truncate">
+        <code className="flex-1 bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 truncate">
           {rawKey}
         </code>
         <Button variant="secondary" size="sm" onClick={copyKey}>
@@ -67,7 +67,7 @@ function ApiKeyRow({ apiKey }: { apiKey: any }) {
   }
 
   return (
-    <tr className="border-b border-obsidian-700">
+    <tr className="border-b border-[#1a1a1f]">
       <td className="px-4 py-3.5">
         <p className="text-sm font-500 text-zinc-200">{apiKey.name}</p>
       </td>
@@ -123,7 +123,7 @@ function CreateKeyForm({ onCreated }: { onCreated: (key: string) => void }) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Key name (e.g. CI pipeline)"
-        className="flex-1 bg-obsidian-800 border border-obsidian-500 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus-violet"
+        className="flex-1 bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-sm text-[#f0f0f2] placeholder-zinc-600 outline-none"
       />
       <Button
         variant="primary"
@@ -157,7 +157,7 @@ export default function SettingsPage() {
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
       {/* API Keys section */}
       <div>
-        <h2 className="font-display text-lg font-600 text-zinc-100 mb-1">API keys</h2>
+        <h2 className="font-display text-lg font-600 text-[#f0f0f2] mb-1">API keys</h2>
         <p className="text-xs text-zinc-500 mb-4">
           Keys grant full API access. Treat them like passwords — never commit to source control.
         </p>
@@ -169,7 +169,7 @@ export default function SettingsPage() {
         )}
 
         <Card className="mb-4">
-          <div className="p-4 border-b border-obsidian-600">
+          <div className="p-4 border-b border-[#1a1a1f]">
             <CreateKeyForm onCreated={(key) => setNewRawKey(key)} />
           </div>
 
@@ -181,7 +181,7 @@ export default function SettingsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-obsidian-700">
+                  <tr className="border-b border-[#1a1a1f]">
                     {["Name", "Key", "Created", "Last used", ""].map((h) => (
                       <th key={h} className="px-4 py-2.5 text-left text-[11px] text-zinc-500 uppercase tracking-wide font-500">
                         {h}
@@ -200,7 +200,7 @@ export default function SettingsPage() {
 
       {/* Webhook section */}
       <div>
-        <h2 className="font-display text-base font-600 text-zinc-100 mb-1">Shield webhook</h2>
+        <h2 className="font-display text-base font-600 text-[#f0f0f2] mb-1">Shield webhook</h2>
         <p className="text-xs text-zinc-500 mb-4">
           Receive a POST request on every Shield violation. Useful for Slack or PagerDuty alerts.
         </p>
@@ -210,7 +210,7 @@ export default function SettingsPage() {
               value={webhookUrl}
               onChange={(e) => setWebhookUrl(e.target.value)}
               placeholder="https://hooks.slack.com/services/..."
-              className="flex-1 bg-obsidian-800 border border-obsidian-500 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus-violet font-mono"
+              className="flex-1 bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-sm text-[#f0f0f2] placeholder-zinc-600 outline-none font-mono"
             />
             <Button
               variant="secondary"

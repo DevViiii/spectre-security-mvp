@@ -40,9 +40,9 @@ function GradeCircle({ grade, score }: { grade: string | null; score: number | n
 
 function Stat({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
   return (
-    <div className="bg-obsidian-800 border border-obsidian-600 rounded-xl px-4 py-3">
+    <div className="bg-[#0d0d11] border border-[#1a1a1f] rounded-xl px-4 py-3">
       <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">{label}</p>
-      <p className="font-display text-xl font-600 text-zinc-100">{value}</p>
+      <p className="font-display text-xl font-600 text-[#f0f0f2]">{value}</p>
       {sub && <p className="text-xs text-zinc-600 mt-0.5">{sub}</p>}
     </div>
   );
@@ -56,7 +56,7 @@ function FindingRow({ finding }: { finding: any }) {
   return (
     <>
       <tr
-        className="border-b border-obsidian-700 hover:bg-obsidian-800/40 cursor-pointer transition-colors"
+        className="border-b border-[#1a1a1f] hover:bg-[#0d0d11]/40 cursor-pointer transition-colors"
         onClick={() => setExpanded((e) => !e)}
       >
         <td className="px-4 py-3 font-mono text-xs text-zinc-500">{finding.attack_id}</td>
@@ -83,12 +83,12 @@ function FindingRow({ finding }: { finding: any }) {
         </td>
       </tr>
       {expanded && (
-        <tr className="border-b border-obsidian-700 bg-obsidian-900/60">
+        <tr className="border-b border-[#1a1a1f] bg-[#0d0d11]">
           <td colSpan={6} className="px-4 py-4">
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
                 <p className="text-zinc-500 uppercase tracking-wide mb-2">Payload</p>
-                <pre className="bg-obsidian-800 border border-obsidian-600 rounded-lg p-3 text-zinc-300 whitespace-pre-wrap break-words font-mono leading-relaxed max-h-32 overflow-y-auto">
+                <pre className="bg-[#0d0d11] border border-[#1a1a1f] rounded-lg p-3 text-zinc-300 whitespace-pre-wrap break-words font-mono leading-relaxed max-h-32 overflow-y-auto">
                   {finding.payload ?? "—"}
                 </pre>
               </div>
@@ -101,7 +101,7 @@ function FindingRow({ finding }: { finding: any }) {
                     </span>
                   )}
                 </p>
-                <pre className="bg-obsidian-800 border border-obsidian-600 rounded-lg p-3 text-zinc-300 whitespace-pre-wrap break-words font-mono leading-relaxed max-h-32 overflow-y-auto">
+                <pre className="bg-[#0d0d11] border border-[#1a1a1f] rounded-lg p-3 text-zinc-300 whitespace-pre-wrap break-words font-mono leading-relaxed max-h-32 overflow-y-auto">
                   {finding.response_excerpt ?? "—"}
                 </pre>
               </div>
@@ -128,10 +128,10 @@ function SeverityBreakdown({ findings }: { findings: any[] }) {
       {counts.map(({ severity, total, failed }) => (
         <div
           key={severity}
-          className="bg-obsidian-800 border border-obsidian-600 rounded-xl p-3 text-center"
+          className="bg-[#0d0d11] border border-[#1a1a1f] rounded-xl p-3 text-center"
         >
           <Badge variant={severity} className="mb-2">{severity}</Badge>
-          <p className="font-display text-2xl font-700 text-zinc-100">{failed}</p>
+          <p className="font-display text-2xl font-700 text-[#f0f0f2]">{failed}</p>
           <p className="text-[10px] text-zinc-600 mt-0.5">of {total} failed</p>
         </div>
       ))}
@@ -203,7 +203,7 @@ export default function ScanDetailPage({
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
-              <h2 className="font-display text-lg font-600 text-zinc-100">
+              <h2 className="font-display text-lg font-600 text-[#f0f0f2]">
                 {scan.name || `Scan ${id.slice(0, 8)}`}
               </h2>
               <Badge variant={scan.status}>{scan.status}</Badge>
@@ -212,8 +212,8 @@ export default function ScanDetailPage({
               {scan.target_url}
             </p>
             {isActive ? (
-              <div className="flex items-center gap-2 text-sm text-violet-glow">
-                <Spinner className="w-4 h-4 text-violet" />
+              <div className="flex items-center gap-2 text-sm text-[#6ef2ff]">
+                <Spinner className="w-4 h-4 text-[#6ef2ff]" />
                 Scan running — results will appear automatically…
               </div>
             ) : scan.grade ? (
@@ -233,7 +233,7 @@ export default function ScanDetailPage({
                     download
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border font-500 transition-all duration-100 focus-violet px-3 py-1.5 text-xs bg-violet/15 text-violet-glow border-violet/30 hover:bg-violet/25"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border font-500 transition-all duration-100 px-3 py-1.5 text-xs text-[#6ef2ff] border-[rgba(110,242,255,0.2)] hover:bg-[rgba(110,242,255,0.08)]"
                   >
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                       <path d="M6.5 1v8M3.5 6l3 3 3-3M1 11.5h11" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
@@ -294,7 +294,7 @@ export default function ScanDetailPage({
       {/* Findings table */}
       {findings.length > 0 && (
         <Card>
-          <div className="flex items-center justify-between px-5 py-3 border-b border-obsidian-600">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#1a1a1f]">
             <h3 className="font-display text-sm font-600 text-zinc-200">Findings</h3>
             <div className="flex items-center gap-1">
               {["all", "failed", "passed", "error"].map((s) => (
@@ -304,7 +304,7 @@ export default function ScanDetailPage({
                   className={clsx(
                     "px-2.5 py-1 rounded text-xs transition-colors capitalize",
                     filter === s
-                      ? "bg-violet/15 text-violet border border-violet/30"
+                      ? "bg-[rgba(110,242,255,0.1)] text-[#6ef2ff] border border-[rgba(110,242,255,0.2)]"
                       : "text-zinc-500 hover:text-zinc-300"
                   )}
                 >
@@ -319,7 +319,7 @@ export default function ScanDetailPage({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-obsidian-700">
+                <tr className="border-b border-[#1a1a1f]">
                   {["ID", "Category", "Severity", "Status", "Payload (excerpt)", ""].map((h) => (
                     <th key={h} className="px-4 py-2.5 text-left text-[11px] text-zinc-500 uppercase tracking-wide font-500">
                       {h}

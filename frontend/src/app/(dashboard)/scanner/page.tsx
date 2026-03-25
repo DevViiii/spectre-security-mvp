@@ -1,273 +1,191 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useScans, useCreateScan, useDeleteScan } from "@/lib/hooks";
-import { Badge, Button, Card, Spinner, EmptyState } from "@/components/ui";
-import { formatRelative, gradeColor, gradeBg } from "@/lib/utils/format";
-import { clsx } from "clsx";
+import { apiClient } from "@/lib/api/client";
+import { Card, Badge, GradeBadge, Button, Spinner, EmptyState } from "@/components/ui";
+import { formatRelative } from "@/lib/utils/format";
 
-// ── Create Scan Modal ──────────────────────────────────────────────────────
+async function fetchScans() {
+  const res = await apiClient.get("/scans?limit=20");
+  return res.data.data;
+}
 
 function CreateScanModal({ onClose }: { onClose: () => void }) {
-  const createScan = useCreateScan();
-  const [form, setForm] = useState({
-    name: "",
-    target_url: "",
-    target_api_key: "",
-    attack_suite: "full" as const,
-  });
+  const qc = useQueryClient();
+  const [form, setForm] = useState({ name: "", target_url: "", target_api_key: "", attack_suite: "quick" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
-      await createScan.mutateAsync({
-        ...form,
-        target_api_key: form.target_api_key || undefined,
-        name: form.name || undefined,
-      });
+      await apiClient.post("/scans", form);
+      qc.invalidateQueries({ queryKey: ["scans"] });
       onClose();
-    } catch {}
+    } catch (err: any) {
+      setError(err?.response?.data?.error?.message ?? "Failed to create scan");
+    } finally {
+      setLoading(false);
+    }
   }
 
+  const inputStyle = {
+    width: "100%", padding: "9px 12px",
+    background: "#050508", border: "1px solid #1a1a1f",
+    borderRadius: "6px", color: "#f0f0f2", fontSize: "13px",
+    outline: "none", boxSizing: "border-box" as const,
+  };
+
+  const labelStyle = {
+    display: "block", fontSize: "11px", fontWeight: 600,
+    color: "#52525b", marginBottom: "6px", letterSpacing: "0.04em",
+    textTransform: "uppercase" as const,
+  };
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(6,6,8,0.85)", backdropFilter: "blur(4px)" }}
-    >
-      <div className="bg-obsidian-900 border border-obsidian-500 rounded-xl w-full max-w-md shadow-violet animate-slide-up">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-obsidian-600">
-          <h2 className="font-display text-sm font-600 text-zinc-100">New scan</h2>
-          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </button>
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      zIndex: 100, padding: "24px",
+    }}>
+      <div style={{
+        background: "#0d0d11", border: "1px solid #1a1a1f",
+        borderRadius: "12px", padding: "24px", width: "100%", maxWidth: "440px",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+          <span style={{ fontSize: "15px", fontWeight: 600, color: "#f0f0f2" }}>New scan</span>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#52525b", cursor: "pointer", fontSize: "18px" }}>×</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <Field label="Scan name (optional)">
-            <Input
-              placeholder="Production chatbot — Q1 audit"
-              value={form.name}
-              onChange={(v) => setForm((f) => ({ ...f, name: v }))}
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div>
+            <label style={labelStyle}>Scan name</label>
+            <input style={inputStyle} placeholder="GPT-4 Security Audit" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              onFocus={e => (e.target.style.borderColor = "rgba(110,242,255,0.3)")}
+              onBlur={e => (e.target.style.borderColor = "#1a1a1f")}
             />
-          </Field>
-
-          <Field label="Target endpoint URL *">
-            <Input
-              placeholder="https://api.example.com/v1/chat/completions"
-              value={form.target_url}
-              onChange={(v) => setForm((f) => ({ ...f, target_url: v }))}
-              required
+          </div>
+          <div>
+            <label style={labelStyle}>Target URL *</label>
+            <input style={inputStyle} required placeholder="https://api.openai.com/v1/chat/completions"
+              value={form.target_url} onChange={e => setForm(f => ({ ...f, target_url: e.target.value }))}
+              onFocus={e => (e.target.style.borderColor = "rgba(110,242,255,0.3)")}
+              onBlur={e => (e.target.style.borderColor = "#1a1a1f")}
             />
-          </Field>
-
-          <Field label="Target API key (optional)">
-            <Input
-              type="password"
-              placeholder="sk-... (sent in Authorization header)"
-              value={form.target_api_key}
-              onChange={(v) => setForm((f) => ({ ...f, target_api_key: v }))}
+          </div>
+          <div>
+            <label style={labelStyle}>Target API key</label>
+            <input style={inputStyle} type="password" placeholder="sk-..."
+              value={form.target_api_key} onChange={e => setForm(f => ({ ...f, target_api_key: e.target.value }))}
+              onFocus={e => (e.target.style.borderColor = "rgba(110,242,255,0.3)")}
+              onBlur={e => (e.target.style.borderColor = "#1a1a1f")}
             />
-          </Field>
-
-          <Field label="Attack suite">
-            <select
-              value={form.attack_suite}
-              onChange={(e) => setForm((f) => ({ ...f, attack_suite: e.target.value as any }))}
-              className="w-full bg-obsidian-800 border border-obsidian-500 rounded-lg px-3 py-2 text-sm text-zinc-200 focus-violet outline-none"
-            >
-              <option value="full">Full (43 attacks)</option>
-              <option value="quick">Quick (critical + high only)</option>
-              <option value="injection_only">Prompt injection only</option>
-              <option value="jailbreak_only">Jailbreak only</option>
+          </div>
+          <div>
+            <label style={labelStyle}>Attack suite</label>
+            <select style={{ ...inputStyle, cursor: "pointer" }}
+              value={form.attack_suite} onChange={e => setForm(f => ({ ...f, attack_suite: e.target.value }))}>
+              <option value="quick">Quick (critical attacks only)</option>
+              <option value="full">Full (all 43 attacks)</option>
             </select>
-          </Field>
-
-          <div className="flex gap-2 pt-2">
-            <Button variant="ghost" type="button" onClick={onClose} className="flex-1">
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={!form.target_url || createScan.isPending}
-              className="flex-1"
-            >
-              {createScan.isPending ? <Spinner className="w-3.5 h-3.5" /> : null}
-              {createScan.isPending ? "Queuing…" : "Start scan"}
-            </Button>
           </div>
 
-          {createScan.isError && (
-            <p className="text-xs text-red-400">Failed to create scan. Check the target URL.</p>
+          {error && (
+            <div style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: "6px", padding: "10px 12px", fontSize: "12px", color: "#f87171" }}>
+              {error}
+            </div>
           )}
+
+          <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", paddingTop: "4px" }}>
+            <Button variant="secondary" onClick={onClose}>Cancel</Button>
+            <button type="submit" disabled={loading} style={{
+              padding: "8px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: 500,
+              background: "rgba(110,242,255,0.1)", border: "1px solid rgba(110,242,255,0.3)",
+              color: "#6ef2ff", cursor: loading ? "wait" : "pointer",
+            }}>
+              {loading ? "Starting..." : "Start scan"}
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wide">{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function Input({
-  type = "text",
-  placeholder,
-  value,
-  onChange,
-  required,
-}: {
-  type?: string;
-  placeholder?: string;
-  value: string;
-  onChange: (v: string) => void;
-  required?: boolean;
-}) {
-  return (
-    <input
-      type={type}
-      placeholder={placeholder}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      required={required}
-      className="w-full bg-obsidian-800 border border-obsidian-500 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus-violet outline-none transition-colors"
-    />
-  );
-}
-
-// ── Scan status indicator ──────────────────────────────────────────────────
-
-function StatusDot({ status }: { status: string }) {
-  const color =
-    status === "running" ? "bg-violet animate-pulse-slow" :
-    status === "completed" ? "bg-green-400" :
-    status === "failed" ? "bg-red-400" :
-    "bg-zinc-600";
-  return <span className={clsx("inline-block w-1.5 h-1.5 rounded-full", color)} />;
-}
-
-// ── Scanner page ───────────────────────────────────────────────────────────
-
 export default function ScannerPage() {
   const [showModal, setShowModal] = useState(false);
-  const { data, isLoading } = useScans();
-  const deleteScaan = useDeleteScan();
-
+  const { data, isLoading } = useQuery({ queryKey: ["scans"], queryFn: fetchScans, refetchInterval: 5_000 });
   const scans = data?.scans ?? [];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-5 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div style={{ maxWidth: "960px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
         <div>
-          <h2 className="font-display text-lg font-600 text-zinc-100">Adversarial scans</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            {scans.length} scan{scans.length !== 1 ? "s" : ""} total
-          </p>
+          <h1 style={{ fontSize: "14px", fontWeight: 500, color: "#f0f0f2", margin: 0 }}>Adversarial scans</h1>
+          <p style={{ fontSize: "12px", color: "#52525b", margin: "3px 0 0" }}>{data?.total ?? 0} scans total</p>
         </div>
-        <Button variant="primary" onClick={() => setShowModal(true)}>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          New scan
-        </Button>
+        <button onClick={() => setShowModal(true)} style={{
+          display: "flex", alignItems: "center", gap: "6px",
+          padding: "8px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 500,
+          background: "rgba(110,242,255,0.08)", border: "1px solid rgba(110,242,255,0.2)",
+          color: "#6ef2ff", cursor: "pointer",
+        }}>
+          <span style={{ fontSize: "16px", lineHeight: 1 }}>+</span> New scan
+        </button>
       </div>
 
-      {/* Content */}
       {isLoading ? (
-        <div className="flex justify-center py-20">
-          <Spinner className="w-6 h-6" />
-        </div>
+        <div style={{ display: "flex", justifyContent: "center", paddingTop: "60px" }}><Spinner size={24} /></div>
       ) : scans.length === 0 ? (
         <Card>
           <EmptyState
-            icon={
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M12 8v5M12 15v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            }
             title="No scans yet"
             description="Create your first scan to test an LLM endpoint for vulnerabilities."
             action={
-              <Button variant="primary" onClick={() => setShowModal(true)}>
-                Start your first scan
-              </Button>
+              <button onClick={() => setShowModal(true)} style={{
+                padding: "8px 16px", borderRadius: "6px", fontSize: "13px",
+                background: "rgba(110,242,255,0.08)", border: "1px solid rgba(110,242,255,0.2)",
+                color: "#6ef2ff", cursor: "pointer",
+              }}>Start your first scan</button>
             }
           />
         </Card>
       ) : (
-        <div className="space-y-2">
-          {scans.map((scan: any) => (
-            <Card key={scan.id}>
-              <Link
-                href={`/scanner/${scan.id}`}
-                className="flex items-center gap-4 px-5 py-4 hover:bg-obsidian-800/40 transition-colors rounded-xl"
-              >
-                {/* Status dot */}
-                <StatusDot status={scan.status} />
-
-                {/* Main info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-sm font-500 text-zinc-200 truncate">
+        <Card>
+          <div style={{ padding: "8px" }}>
+            {scans.map((scan: any, i: number) => (
+              <Link key={scan.id} href={`/scanner/${scan.id}`} style={{ textDecoration: "none" }}>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: "12px",
+                  padding: "10px", borderRadius: "6px",
+                  borderBottom: i < scans.length - 1 ? "1px solid #111115" : "none",
+                  transition: "background 0.15s",
+                }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#111115")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  <GradeBadge grade={scan.grade} score={scan.score} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: "13px", fontWeight: 500, color: "#f0f0f2", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {scan.name || `Scan ${scan.id.slice(0, 8)}`}
-                    </span>
-                    <Badge variant={scan.status}>{scan.status}</Badge>
+                    </p>
+                    <p style={{ fontSize: "11px", color: "#52525b", margin: "2px 0 0", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {scan.target_url}
+                    </p>
                   </div>
-                  <p className="text-xs text-zinc-500 font-mono truncate">
-                    {scan.target_url}
-                  </p>
-                </div>
-
-                {/* Grade */}
-                {scan.grade ? (
-                  <div
-                    className={clsx(
-                      "w-10 h-10 rounded-lg border flex items-center justify-center font-display text-lg font-700 shrink-0",
-                      gradeBg(scan.grade)
-                    )}
-                  >
-                    {scan.grade}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px", flexShrink: 0 }}>
+                    <Badge variant={scan.status as any}>{scan.status}</Badge>
+                    <span style={{ fontSize: "10px", color: "#3f3f46" }}>{formatRelative(scan.created_at)}</span>
                   </div>
-                ) : (
-                  <div className="w-10 h-10 rounded-lg border border-obsidian-500 bg-obsidian-700 flex items-center justify-center shrink-0">
-                    <span className="text-xs text-zinc-600">—</span>
-                  </div>
-                )}
-
-                {/* Score */}
-                <div className="w-16 text-right shrink-0">
-                  {scan.score !== null ? (
-                    <>
-                      <span className={clsx("text-lg font-600", gradeColor(scan.grade))}>
-                        {scan.score}
-                      </span>
-                      <span className="text-xs text-zinc-600">/100</span>
-                    </>
-                  ) : (
-                    <span className="text-sm text-zinc-600">—</span>
-                  )}
-                </div>
-
-                {/* Date */}
-                <div className="w-28 text-right shrink-0">
-                  <span className="text-xs text-zinc-500">
-                    {formatRelative(scan.created_at)}
-                  </span>
                 </div>
               </Link>
-            </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        </Card>
       )}
 
       {showModal && <CreateScanModal onClose={() => setShowModal(false)} />}

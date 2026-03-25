@@ -2,19 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { clsx } from "clsx";
 
-const nav = [
+const NAV = [
   {
     label: "Overview",
     href: "/overview",
     icon: (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="2" y="2" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
-        <rect x="9" y="2" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
-        <rect x="2" y="9" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
-        <rect x="9" y="9" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <rect x="1" y="1" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+        <rect x="8" y="1" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+        <rect x="1" y="8" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+        <rect x="8" y="8" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
       </svg>
     ),
   },
@@ -22,10 +20,10 @@ const nav = [
     label: "Scanner",
     href: "/scanner",
     icon: (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.25"/>
-        <path d="M8 5.5v5M5.5 8h5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
-        <circle cx="13.5" cy="2.5" r="1.5" fill="currentColor" className="text-violet"/>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.2"/>
+        <circle cx="7" cy="7" r="2.5" stroke="currentColor" strokeWidth="1.2"/>
+        <path d="M7 1.5V4M7 10v2.5M1.5 7H4M10 7h2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
       </svg>
     ),
   },
@@ -33,8 +31,9 @@ const nav = [
     label: "Shield",
     href: "/shield",
     icon: (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M8 1.5L2.5 4v4c0 3 2.5 5.5 5.5 6 3-0.5 5.5-3 5.5-6V4L8 1.5z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round"/>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 1.5L2 3.5v4c0 3 2.2 5 5 5s5-2 5-5v-4L7 1.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+        <path d="M4.5 7l1.5 1.5L9 5.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
   },
@@ -42,9 +41,9 @@ const nav = [
     label: "Reports",
     href: "/reports",
     icon: (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="2.5" y="1.5" width="11" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
-        <path d="M5 5.5h6M5 8h6M5 10.5h4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <rect x="2" y="1.5" width="10" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+        <path d="M4.5 5h5M4.5 7.5h5M4.5 10h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
       </svg>
     ),
   },
@@ -52,9 +51,9 @@ const nav = [
     label: "Settings",
     href: "/settings",
     icon: (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.25"/>
-        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="7" r="2" stroke="currentColor" strokeWidth="1.2"/>
+        <path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.8 2.8l1.1 1.1M10.1 10.1l1.1 1.1M2.8 11.2l1.1-1.1M10.1 3.9l1.1-1.1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
       </svg>
     ),
   },
@@ -64,107 +63,73 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside
-      className="w-[220px] shrink-0 flex flex-col bg-obsidian-900 border-r border-obsidian-600"
-      style={{ boxShadow: "inset -1px 0 0 #22222f" }}
-    >
+    <aside style={{
+      width: "200px",
+      flexShrink: 0,
+      background: "#070709",
+      borderRight: "1px solid #111115",
+      display: "flex",
+      flexDirection: "column",
+      height: "100vh",
+      position: "sticky",
+      top: 0,
+    }}>
       {/* Brand */}
-      <div className="flex items-center gap-2.5 px-5 h-14 border-b border-obsidian-600">
-        <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
-          <path d="M14 3C8.48 3 4 7.48 4 13v10l3-2.5 3 2.5 3-2.5 3 2.5 3-2.5 3 2.5V13c0-5.52-4.48-10-10-10z" fill="#7c3aed" opacity="0.9"/>
-          <circle cx="10" cy="13" r="1.5" fill="#0d0d12"/>
-          <circle cx="18" cy="13" r="1.5" fill="#0d0d12"/>
-        </svg>
-        <span className="font-display text-sm font-600 text-zinc-100 tracking-tight">
-          Spectre<span className="text-violet"> Security</span>
+      <div style={{
+        padding: "18px 16px",
+        borderBottom: "1px solid #111115",
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+      }}>
+        <div style={{
+          width: "26px", height: "26px", borderRadius: "7px",
+          background: "linear-gradient(135deg, #6ef2ff, #4f8cff)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          flexShrink: 0,
+        }}>
+          <span style={{ fontSize: "12px", fontWeight: 800, color: "#030810" }}>S</span>
+        </div>
+        <span style={{ fontSize: "13px", fontWeight: 700, color: "#f0f0f2", letterSpacing: "-0.2px" }}>
+          Spectre <span style={{ color: "#6ef2ff" }}>Security</span>
         </span>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-3 space-y-0.5">
-        {nav.map((item) => {
+      <nav style={{ flex: 1, padding: "12px 8px" }}>
+        {NAV.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={clsx(
-                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-100",
-                active
-                  ? "bg-violet/10 text-violet border border-violet/20 shadow-violet-sm"
-                  : "text-zinc-500 hover:text-zinc-300 hover:bg-obsidian-700"
-              )}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "9px",
+                padding: "8px 10px",
+                borderRadius: "6px",
+                marginBottom: "1px",
+                textDecoration: "none",
+                background: active ? "#111115" : "transparent",
+                color: active ? "#6ef2ff" : "#3f3f46",
+                fontSize: "13px",
+                fontWeight: active ? 500 : 400,
+                transition: "color 0.15s, background 0.15s",
+                borderLeft: active ? "2px solid #6ef2ff" : "2px solid transparent",
+              }}
             >
-              <span className={active ? "text-violet" : "text-zinc-600"}>{item.icon}</span>
+              {item.icon}
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="px-5 pb-4 pt-2 border-t border-obsidian-600">
-        <span className="font-mono text-[10px] text-zinc-600">v0.1.0-mvp</span>
+      {/* Footer */}
+      <div style={{ padding: "12px 16px", borderTop: "1px solid #111115" }}>
+        <span style={{ fontSize: "10px", color: "#27272a", fontFamily: "monospace" }}>v0.1.0-mvp</span>
       </div>
     </aside>
-  );
-}
-
-
-export function MobileNav() {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-
-  return (
-    <>
-      <div className="flex items-center justify-between px-4 h-12 bg-obsidian-900 border-b border-obsidian-600">
-        <div className="flex items-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 28 28" fill="none">
-            <path d="M14 3C8.48 3 4 7.48 4 13v10l3-2.5 3 2.5 3-2.5 3 2.5 3-2.5 3 2.5V13c0-5.52-4.48-10-10-10z" fill="#7c3aed" opacity="0.9"/>
-            <circle cx="10" cy="13" r="1.5" fill="#0d0d12"/>
-            <circle cx="18" cy="13" r="1.5" fill="#0d0d12"/>
-          </svg>
-          <span className="font-display text-xs font-600 text-zinc-100 tracking-tight">
-            Spectre<span className="text-violet"> Security</span>
-          </span>
-        </div>
-        <button
-          onClick={() => setOpen(!open)}
-          className="p-1 text-zinc-400 hover:text-zinc-200"
-        >
-          {open ? (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          ) : (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          )}
-        </button>
-      </div>
-      {open && (
-        <div className="bg-obsidian-900 border-b border-obsidian-600 px-3 py-2 space-y-0.5">
-          {nav.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + "/");
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={clsx(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-100",
-                  active
-                    ? "bg-violet/10 text-violet border border-violet/20"
-                    : "text-zinc-500 hover:text-zinc-300 hover:bg-obsidian-700"
-                )}
-              >
-                <span className={active ? "text-violet" : "text-zinc-600"}>{item.icon}</span>
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
-      )}
-    </>
   );
 }

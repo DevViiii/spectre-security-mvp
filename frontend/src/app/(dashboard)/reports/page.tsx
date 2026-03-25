@@ -88,13 +88,13 @@ function ReportCard({ scan }: { scan: any }) {
         </div>
 
         <div className="mt-4 grid grid-cols-4 gap-3">
-          <div className="bg-obsidian-800 border border-obsidian-600 rounded-lg px-3 py-2 text-center">
+          <div className="bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-center">
             <p className={clsx("font-display text-lg font-700", gradeColor(scan.grade))}>
               {scan.score ?? "—"}
             </p>
             <p className="text-[10px] text-zinc-600 mt-0.5">Score</p>
           </div>
-          <div className="bg-obsidian-800 border border-obsidian-600 rounded-lg px-3 py-2 text-center">
+          <div className="bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-center">
             <p className={clsx(
               "font-display text-lg font-700",
               (scan.failed_attacks ?? 0) > 0 ? "text-red-400" : "text-green-400"
@@ -103,13 +103,13 @@ function ReportCard({ scan }: { scan: any }) {
             </p>
             <p className="text-[10px] text-zinc-600 mt-0.5">Vulns</p>
           </div>
-          <div className="bg-obsidian-800 border border-obsidian-600 rounded-lg px-3 py-2 text-center">
+          <div className="bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-center">
             <p className="font-display text-lg font-700 text-zinc-300">
               {scan.total_attacks ?? 0}
             </p>
             <p className="text-[10px] text-zinc-600 mt-0.5">Attacks</p>
           </div>
-          <div className="bg-obsidian-800 border border-obsidian-600 rounded-lg px-3 py-2 text-center">
+          <div className="bg-[#0d0d11] border border-[#1a1a1f] rounded-lg px-3 py-2 text-center">
             <p className="font-display text-xs font-600 text-zinc-400 capitalize">
               {scan.attack_suite}
             </p>
@@ -141,7 +141,7 @@ export default function ReportsPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-5 animate-fade-in">
       <div>
-        <h2 className="font-display text-lg font-600 text-zinc-100">Reports</h2>
+        <h2 className="font-display text-lg font-600 text-[#f0f0f2]">Reports</h2>
         <p className="text-xs text-zinc-500 mt-0.5">
           {scans?.length ?? 0} completed scan{scans?.length !== 1 ? "s" : ""} ·{" "}
           {withReports.length} report{withReports.length !== 1 ? "s" : ""} generated
