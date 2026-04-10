@@ -121,7 +121,7 @@ async def list_violations(
     violations, total = await service.list_violations(db, limit=limit, offset=offset)
     return ok(
         {
-            "violations": [ViolationResponse.model_validate(v).model_dump() for v in violations],
+            "violations": [ViolationResponse.from_orm_with_policy(v).model_dump() for v in violations],
             "total": total,
         },
         request_id=request_id,

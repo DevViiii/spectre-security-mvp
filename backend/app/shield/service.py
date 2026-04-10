@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.exceptions import PolicyNotFound
 from app.shield.models import Policy, Violation
@@ -102,7 +103,7 @@ async def list_violations(
     offset: int = 0,
     cursor: str | None = None,
 ) -> tuple[list[Violation], int]:
-    query = select(Violation).order_by(Violation.created_at.desc()).limit(limit)
+    query = select(Violation).options(selectinload(Violation.policy)).order_by(Violation.created_at.desc()).limit(limit)
     if policy_id:
         query = query.where(Violation.policy_id == policy_id)
     if cursor:

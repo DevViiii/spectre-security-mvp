@@ -103,6 +103,13 @@ class ViolationResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+    @classmethod
+    def from_orm_with_policy(cls, violation) -> "ViolationResponse":
+        data = cls.model_validate(violation).model_dump()
+        if hasattr(violation, "policy") and violation.policy:
+            data["policy_name"] = violation.policy.name
+        return cls(**data)
+
 
 class ViolationListResponse(BaseModel):
     violations: list[ViolationResponse]
