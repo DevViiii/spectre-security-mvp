@@ -31,6 +31,29 @@ _BUILTIN_POLICY_ID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 logger = structlog.get_logger(__name__)
 
 _POLICY_CACHE_KEY = "shield:active_policies"
+_builtin_policy_ensured = False
+
+
+async def _ensure_builtin_policy(db: AsyncSession) -> None:
+    """Create the sentinel policy row for built-in detection violations if missing."""
+    global _builtin_policy_ensured
+    if _builtin_policy_ensured:
+        return
+    existing = await db.get(Policy, _BUILTIN_POLICY_ID)
+    if not existing:
+        db.add(Policy(
+            id=_BUILTIN_POLICY_ID,
+            name="Built-in Detection",
+            description="Sentinel policy for built-in detection engine findings",
+            rule_type="regex",
+            rule_config={"pattern": ".*"},
+            action="alert",
+            applies_to="both",
+            is_active=False,
+            is_builtin=True,
+        ))
+        await db.flush()
+    _builtin_policy_ensured = True
 
 
 async def run_inspection(
@@ -46,6 +69,7 @@ async def run_inspection(
     4. Return allow/block/redact decision.
     """
     start = time.perf_counter()
+    await _ensure_builtin_policy(db)
     policies = await _load_policies(db, redis)
 
     result = inspect(
@@ -78,9 +102,18 @@ async def run_inspection(
             match_location=request.direction,
         ))
 
-    # Surface detection engine findings as violations
+    # Surface detection engine findings as violations and persist them
     for finding in detection.findings:
         action = "block" if finding.severity == "critical" else "alert"
+        await shield_service.log_violation(
+            db,
+            policy_id=_BUILTIN_POLICY_ID,
+            direction=finding.direction,
+            action_taken=action,
+            matched_pattern=finding.matched_text[:200],
+            context_excerpt=request.text[:500],
+            metadata=request.context,
+        )
         violation_details.append(ViolationDetail(
             policy_id=_BUILTIN_POLICY_ID,
             policy_name=finding.rule_name,

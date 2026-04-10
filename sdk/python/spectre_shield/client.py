@@ -119,6 +119,10 @@ class ShieldClient:
         except Exception as exc:
             return self._handle_error(text, ShieldConnectionError(str(exc)))
 
+        # Unwrap response envelope if present ({"data": {...}})
+        if "data" in body and isinstance(body["data"], dict):
+            body = body["data"]
+
         return self._parse_response(body, text)
 
     def inspect_input(self, text: str, **kwargs) -> InspectionResult:
