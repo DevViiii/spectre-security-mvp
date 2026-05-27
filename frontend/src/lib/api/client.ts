@@ -1,29 +1,21 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 
 // ── Client factory ─────────────────────────────────────────────────────────
-
-function getApiKey(): string {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.match(/spectre_api_key=([^;]+)/);
-  return match ? match[1] : "";
-}
+//
+// Browser sessions use an httpOnly cookie set by the backend at login. The
+// browser sends it automatically via `withCredentials: true`; JS never touches
+// the raw key, so XSS can't exfiltrate it.
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000",
   headers: { "Content-Type": "application/json" },
-});
-
-apiClient.interceptors.request.use((config) => {
-  const key = getApiKey();
-  if (key) config.headers["X-Api-Key"] = key;
-  return config;
+  withCredentials: true,
 });
 
 apiClient.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401 && typeof window !== "undefined") {
-      document.cookie = "spectre_api_key=; path=/; max-age=0";
       window.location.href = "/login";
     }
     return Promise.reject(err);

@@ -69,11 +69,11 @@ export default function VerifyPage() {
         const res = await fetch(`${apiBase}/auth/magic/verify`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ token }),
         });
         const data = await res.json();
-        if (res.ok && data?.data?.api_key) {
-          document.cookie = `spectre_api_key=${data.data.api_key}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+        if (res.ok) {
           setStatus("success");
           setTimeout(() => router.push("/overview"), 1500);
         } else {

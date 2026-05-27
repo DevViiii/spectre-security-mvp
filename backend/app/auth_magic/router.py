@@ -6,11 +6,12 @@ GET  /auth/magic/verify   — validates token, returns session info
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from pydantic import BaseModel, EmailStr
 import redis.asyncio as aioredis
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.session import set_session_cookie
 from app.auth_magic.service import generate_magic_link, verify_magic_link
 from app.auth_magic.email import send_magic_link_email
 from app.config import settings
@@ -60,13 +61,14 @@ async def request_magic_link(
 @router.post("/verify", summary="Verify a magic link token")
 async def verify_magic_link_token(
     payload: MagicLinkVerifyRequest,
+    response: Response,
     db: AsyncSession = Depends(get_db),
     redis: aioredis.Redis = Depends(get_redis),
 ):
     """
-    Verifies a magic link token.
-    On success: returns the API key for the session.
-    On failure: returns 400 with error message.
+    Verifies a magic link token. On success: sets the httpOnly session cookie
+    and returns is_new_user + welcome message. The raw API key is NOT echoed
+    in the response body — only the cookie carries it, so JS can't read it.
     """
     try:
         api_key, is_new_user = await verify_magic_link(
@@ -74,8 +76,8 @@ async def verify_magic_link_token(
             redis=redis,
             db=db,
         )
+        set_session_cookie(response, api_key)
         return ok({
-            "api_key": api_key,
             "is_new_user": is_new_user,
             "message": "Welcome to Spectre Security!" if is_new_user else "Welcome back!",
         })

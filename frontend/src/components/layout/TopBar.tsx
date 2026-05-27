@@ -19,8 +19,16 @@ export function TopBar() {
     pathname === path || pathname.startsWith(path + "/")
   )?.[1] ?? "Spectre Security";
 
-  function signOut() {
-    document.cookie = "spectre_api_key=; path=/; max-age=0";
+  async function signOut() {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    try {
+      await fetch(`${apiBase}/auth/session`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+    } catch {
+      // Cookie is httpOnly; best-effort logout still navigates away.
+    }
     router.push("/");
   }
 

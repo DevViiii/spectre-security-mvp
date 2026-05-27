@@ -32,6 +32,7 @@ from app.rate_limit import limiter, _rate_limit_exceeded_handler
 
 # Router imports
 from app.auth.router import router as auth_router
+from app.auth.session import router as session_router
 from app.audit.router import router as audit_router
 from app.health import router as health_router
 from app.organizations.router import router as organizations_router
@@ -99,6 +100,7 @@ def create_app() -> FastAPI:
     # ── Routers ────────────────────────────────────────────────────────────
     app.include_router(health_router,        prefix="",               tags=["health"])
     app.include_router(auth_router,          prefix="/auth",          tags=["auth"])
+    app.include_router(session_router,       prefix="/auth/session",  tags=["auth"])
     app.include_router(scanner_router,       prefix="/scans",         tags=["scanner"])
     app.include_router(shield_router,        prefix="/shield",        tags=["shield"])
     app.include_router(reports_router,       prefix="/reports",       tags=["reports"])

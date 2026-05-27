@@ -64,11 +64,13 @@ export default function LoginPage() {
     setError("");
     try {
       const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-      const res = await fetch(`${apiBase}/health`, {
-        headers: { "X-Api-Key": apiKey.trim() },
+      const res = await fetch(`${apiBase}/auth/session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ api_key: apiKey.trim() }),
       });
       if (res.ok) {
-        document.cookie = `spectre_api_key=${apiKey.trim()}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
         router.push("/overview");
       } else {
         setError("Invalid API key. Check your key and try again.");
