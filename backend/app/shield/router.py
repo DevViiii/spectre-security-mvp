@@ -62,9 +62,12 @@ async def create_policy(
     body: PolicyCreate,
     _key: ApiKey,
     db: AsyncSession = Depends(get_db),
+    redis: aioredis.Redis = Depends(get_redis),
     request_id: RequestID = None,
 ):
     policy = await service.create_policy(db, body)
+    from app.shield.proxy import invalidate_policy_cache
+    await invalidate_policy_cache(redis)
     return created(PolicyResponse.model_validate(policy).model_dump(), request_id=request_id)
 
 
@@ -87,11 +90,14 @@ async def update_policy(
     body: PolicyUpdate,
     _key: ApiKey,
     db: AsyncSession = Depends(get_db),
+    redis: aioredis.Redis = Depends(get_redis),
     request_id: RequestID = None,
 ):
     policy = await service.update_policy(db, policy_id, body)
     if not policy:
         raise NotFound(f"Policy {policy_id} not found")
+    from app.shield.proxy import invalidate_policy_cache
+    await invalidate_policy_cache(redis)
     return ok(PolicyResponse.model_validate(policy).model_dump(), request_id=request_id)
 
 

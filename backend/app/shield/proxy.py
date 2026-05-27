@@ -12,12 +12,18 @@ v1 pipeline:
 from __future__ import annotations
 
 import time
+from datetime import datetime
 
 import redis.asyncio as aioredis
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import uuid
+
+_REQUIRED_POLICY_FIELDS = frozenset({
+    "id", "name", "rule_type", "rule_config", "action",
+    "applies_to", "is_active", "is_builtin",
+})
 
 from app.config import settings
 from app.shield import service as shield_service
@@ -160,11 +166,11 @@ async def _load_policies(db: AsyncSession, redis: aioredis.Redis) -> list[Policy
 
     cache_hit = await redis.get(_POLICY_CACHE_KEY)
     if cache_hit:
-        try:
-            rows = json.loads(cache_hit)
-            return [Policy(**row) for row in rows]
-        except Exception:
-            pass  # fall through to DB
+        cached = _deserialize_cached_policies(cache_hit)
+        if cached is not None:
+            return cached
+        # Invalid cache payload — nuke it so the next writer replaces it.
+        await redis.delete(_POLICY_CACHE_KEY)
 
     policies = await shield_service.list_active_policies(db)
 
@@ -183,3 +189,48 @@ async def _load_policies(db: AsyncSession, redis: aioredis.Redis) -> list[Policy
 async def invalidate_policy_cache(redis: aioredis.Redis) -> None:
     """Call after any policy mutation to force a fresh DB read on next inspection."""
     await redis.delete(_POLICY_CACHE_KEY)
+
+
+def _deserialize_cached_policies(blob: str | bytes) -> list[Policy] | None:
+    """
+    Parse the Redis policy cache payload into Policy objects.
+    Returns None if the payload is malformed — caller falls back to DB.
+    """
+    import json
+
+    try:
+        rows = json.loads(blob)
+    except (ValueError, TypeError) as exc:
+        logger.warning("policy_cache_decode_failed", error=str(exc))
+        return None
+
+    if not isinstance(rows, list):
+        logger.warning("policy_cache_unexpected_shape", got=type(rows).__name__)
+        return None
+
+    policies: list[Policy] = []
+    for row in rows:
+        policy = _row_to_policy(row)
+        if policy is None:
+            logger.warning("policy_cache_row_invalid", row_keys=list(row.keys()) if isinstance(row, dict) else None)
+            return None
+        policies.append(policy)
+    return policies
+
+
+def _row_to_policy(row: object) -> Policy | None:
+    if not isinstance(row, dict):
+        return None
+    if not _REQUIRED_POLICY_FIELDS.issubset(row.keys()):
+        return None
+
+    try:
+        coerced = dict(row)
+        coerced["id"] = uuid.UUID(coerced["id"]) if isinstance(coerced["id"], str) else coerced["id"]
+        for ts_field in ("created_at", "updated_at"):
+            if isinstance(coerced.get(ts_field), str):
+                coerced[ts_field] = datetime.fromisoformat(coerced[ts_field])
+        return Policy(**coerced)
+    except (ValueError, TypeError) as exc:
+        logger.warning("policy_cache_coerce_failed", error=str(exc))
+        return None

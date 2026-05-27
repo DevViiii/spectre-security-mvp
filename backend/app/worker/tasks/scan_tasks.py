@@ -14,11 +14,13 @@ Flow:
 from __future__ import annotations
 
 import asyncio
+import time
 import uuid
 from datetime import datetime, timezone
 
 import httpx
 import structlog
+from kombu.exceptions import OperationalError as KombuOperationalError
 
 from app.worker.celery_app import celery_app
 
@@ -129,11 +131,10 @@ async def _run_scan_async(scan_id: str) -> dict:
             await db.commit()
 
         # ── 8. Auto-generate report ────────────────────────────────────
-        celery_app.send_task(
-            "worker.tasks.report_tasks.generate_report",
-            args=[scan_id],
-            queue="reports",
-        )
+        # Scan is already persisted as completed; if dispatch fails the user
+        # can re-trigger report generation manually. Retry transient broker
+        # errors a few times before giving up.
+        _dispatch_report(scan_id, log)
 
         return {
             "scan_id": scan_id,
@@ -217,6 +218,32 @@ async def _execute_attack(
         logger.warning("attack_execution_error", attack_id=attack.id, error=str(exc))
 
     return base
+
+
+def _dispatch_report(scan_id: str, log) -> None:
+    last_exc: Exception | None = None
+    for attempt in range(1, 4):
+        try:
+            async_result = celery_app.send_task(
+                "worker.tasks.report_tasks.generate_report",
+                args=[scan_id],
+                queue="reports",
+            )
+            log.info("report_dispatched", task_id=async_result.id, attempt=attempt)
+            return
+        except KombuOperationalError as exc:
+            last_exc = exc
+            log.warning("report_dispatch_retry", attempt=attempt, error=str(exc))
+            time.sleep(2 ** (attempt - 1))
+        except Exception as exc:
+            log.error("report_dispatch_failed", error=str(exc), error_type=type(exc).__name__)
+            return
+
+    log.error(
+        "report_dispatch_exhausted",
+        attempts=3,
+        error=str(last_exc) if last_exc else None,
+    )
 
 
 async def _fail_scan(scan_id: str, error_message: str) -> None:
