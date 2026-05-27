@@ -6,6 +6,7 @@ from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.crypto import EncryptedString
 from app.core.database import Base
 
 
@@ -16,7 +17,7 @@ class Scan(Base):
     name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     target_url: Mapped[str] = mapped_column(String(2048), nullable=False)
     target_api_key_hint: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    target_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    target_api_key: Mapped[str | None] = mapped_column(EncryptedString(1000), nullable=True)
     attack_suite: Mapped[str] = mapped_column(String(50), default="full", nullable=False)
 
     # Status lifecycle: pending → running → completed | failed

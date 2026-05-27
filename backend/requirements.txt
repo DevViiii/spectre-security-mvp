@@ -41,3 +41,6 @@ pyyaml==6.0.2
 
 # ── Logging ────────────────────────────────────────────────────────────────
 structlog==24.4.0
+
+# ── Crypto (column-level encryption for sensitive fields) ─────────────────
+cryptography==44.0.0
